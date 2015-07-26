@@ -1,0 +1,8 @@
+*.zip
+.DS_Store
+
+# NPM packages used by Grunt.js
+/node_modules
+
+# NPM debug log
+npm-debug.log
