@@ -69,7 +69,7 @@ class WC_Dev_Helper_Subscriptions {
 			)
 		);
 
-		$actions['renew'] = sprintf( '<a href="%s">%s</a>', esc_url( $renew_url ), __( 'Renew' ) );
+		$actions['renew'] = sprintf( '<a href="%s">%s</a>', esc_url( $renew_url ), __( 'Renew', 'woocommerce-dev-helper' ) );
 
 		return $actions;
 	}
@@ -89,7 +89,7 @@ class WC_Dev_Helper_Subscriptions {
 
 		// nonce check
 		if ( ! wp_verify_nonce( $_REQUEST['_wpnonce'], $_GET['subscription'] ) ) {
-			wp_die( __( 'Action Failed, Invalid Nonce' ) );
+			wp_die( __( 'Action Failed, Invalid Nonce', 'woocommerce-dev-helper' ) );
 		}
 
 		// load gateways
@@ -117,7 +117,7 @@ class WC_Dev_Helper_Subscriptions {
 		}
 
 		$args['custom_action'] = true;
-		$args['messages'] = array( __( 'Subscription Renewal Processed' ) );
+		$args['messages'] = array( __( 'Subscription Renewal Processed', 'woocommerce-dev-helper' ) );
 
 		return $args;
 	}

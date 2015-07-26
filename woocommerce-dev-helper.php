@@ -186,7 +186,7 @@ class WC_Dev_Helper {
 	 * @since 0.1.0
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'You cannot clone instances of WooCommerce Dev Helper.' ), '0.1.0' );
+		_doing_it_wrong( __FUNCTION__, __( 'You cannot clone instances of WooCommerce Dev Helper.', 'woocommerce-dev-helper' ), '0.1.0' );
 	}
 
 
@@ -196,7 +196,7 @@ class WC_Dev_Helper {
 	 * @since 0.1.0
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'You cannot unserialize instances of WooCommerce Dev Helper.' ), '0.1.0' );
+		_doing_it_wrong( __FUNCTION__, __( 'You cannot unserialize instances of WooCommerce Dev Helper.', 'woocommerce-dev-helper' ), '0.1.0' );
 	}
 
 
