@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.1.0
+ * Version: 0.2.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *

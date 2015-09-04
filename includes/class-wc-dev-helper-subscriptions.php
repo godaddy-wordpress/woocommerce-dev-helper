@@ -141,7 +141,7 @@ class WC_Dev_Helper_Subscriptions {
 		$subscription = wcs_get_subscription( absint( $_REQUEST['id'] ) );
 
 		if ( $subscription instanceof WC_Subscription ) {
-			echo '<div class="updated"><p>' . sprintf( esc_html__( 'Subscription renewal processed. %sView Renewal Order%s' ), '<a href="' . wcs_get_edit_post_link( $subscription->get_last_order() ) . '">', ' &#8594;</a>' ) . '</p></div>';
+			echo '<div class="updated"><p>' . sprintf( esc_html__( 'Subscription renewal processed. %sView Renewal Order%s', 'woocommerce-dev-helper' ), '<a href="' . wcs_get_edit_post_link( $subscription->get_last_order() ) . '">', ' &#8594;</a>' ) . '</p></div>';
 		}
 	}
 

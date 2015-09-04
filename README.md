@@ -31,5 +31,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.2.0 - 2015.09.04
+ * Feature - Subscriptions 2.0 Compatibility
+ * Fix - Fix is_ssl() when using Forward
+
 ### 0.1.0 - 2015.07.25
  * Initial Release
