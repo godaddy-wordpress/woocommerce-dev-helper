@@ -100,6 +100,11 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 		// prevent redirection
 		add_filter( 'redirect_canonical', '__return_false' );
+
+		// if accessing via SSL, let WP know (see notes under https://codex.wordpress.org/Function_Reference/is_ssl)
+		if ( isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) && 'https' === $_SERVER['HTTP_X_FORWARDED_PROTO'] ) {
+			$_SERVER['HTTPS'] = 'on';
+		}
 	}
 
 

@@ -114,6 +114,7 @@ if ( ! function_exists( 'wp_var_log' ) ) :
 	 * @since 0.1.0
 	 * @param mixed $var variable to log
 	 * @param bool $dump use wp_var_dump() instead of print_r(), default false
+	 * @return string
 	 */
 	function wp_var_log( $var, $dump = false ) {
 

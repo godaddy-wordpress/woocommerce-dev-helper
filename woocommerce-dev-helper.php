@@ -58,7 +58,7 @@ class WC_Dev_Helper {
 
 
 	/**
-	 * Removes the "Please install Woo Updater" notice when an offical WC extension
+	 * Removes the "Please install Woo Updater" notice when an official WC extension
 	 * is active but the Woo Updater plugin is not
 	 *
 	 * @since 0.1.0
