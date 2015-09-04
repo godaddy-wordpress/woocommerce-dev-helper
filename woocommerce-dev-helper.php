@@ -79,9 +79,11 @@ class WC_Dev_Helper {
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
 		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
 
-		// Subscriptions helper
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-subscriptions.php' );
-		$this->subscriptions = new WC_Dev_Helper_Subscriptions();
+		if ( class_exists( 'WC_Subscriptions' ) ) {
+			// Subscriptions helper
+			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-subscriptions.php' );
+			$this->subscriptions = new WC_Dev_Helper_Subscriptions();
+		}
 	}
 
 
