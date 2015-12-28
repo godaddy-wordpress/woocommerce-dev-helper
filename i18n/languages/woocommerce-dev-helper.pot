@@ -2,7 +2,7 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Dev Helper 0.1.0\n"
+"Project-Id-Version: WooCommerce Dev Helper 0.3.0\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/skyverge/woocommerce-dev-helper/issues\n"
 "POT-Creation-Date: 2015-07-26 19:51:27+00:00\n"
@@ -13,23 +13,27 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: includes/class-wc-dev-helper-subscriptions.php:72
+#: includes/class-wc-dev-helper-subscriptions.php:91
 msgid "Renew"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:92
+#: includes/class-wc-dev-helper-subscriptions.php:144
+msgid "Subscription renewal processed. %sView Renewal Order%s"
+msgstr ""
+
+#: includes/class-wc-dev-helper-subscriptions.php:167
 msgid "Action Failed, Invalid Nonce"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:120
+#: includes/class-wc-dev-helper-subscriptions.php:196
 msgid "Subscription Renewal Processed"
 msgstr ""
 
-#: woocommerce-dev-helper.php:189
+#: woocommerce-dev-helper.php:205
 msgid "You cannot clone instances of WooCommerce Dev Helper."
 msgstr ""
 
-#: woocommerce-dev-helper.php:199
+#: woocommerce-dev-helper.php:215
 msgid "You cannot unserialize instances of WooCommerce Dev Helper."
 msgstr ""
 

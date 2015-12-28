@@ -9,7 +9,7 @@ Once activated, this plugin will make WordPress use HTTP_X_FORWARDED_HOST for al
 
 We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your WordPress root.
 
-### Subscriptions (v1.5.x)
+### Subscriptions (v1.5.x and v2.x.x)
 
 Adds a "renew" link to each subscription under WooCommerce > Subscriptions for easy renewal processing. This is particularly useful for testing
 payment gateways that supports subscriptions.
@@ -23,6 +23,7 @@ payment gateways that supports subscriptions.
 ### Misc
 
 * Removes the WooThemes Updater notice
+* Removes the strong password requirement for customer accounts
 * Helper for logging actions/filters fired during a page load -- simply add `?wcdh_hooks=actions|filters|all`, reload the page, and your desired hooks will be printed to the error log, along with the fired count
 
 ## Installation
@@ -30,6 +31,9 @@ payment gateways that supports subscriptions.
 Download and install just like any other WordPress plugin. If you want to be really fancy, symlink it into your installs instead.
 
 ## Changelog
+
+### 0.3.0 - 2015.12.28
+ * Feature - Removes WooCommerce 2.5+ strong password requirement for customer registration
 
 ### 0.2.0 - 2015.09.04
  * Feature - Subscriptions 2.0 Compatibility
