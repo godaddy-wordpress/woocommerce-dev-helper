@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.2.0
+ * Version: 0.3.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
@@ -54,6 +54,9 @@ class WC_Dev_Helper {
 
 		// maybe log actions/filters
 		add_action( 'shutdown', array( $this, 'maybe_log_hooks' ) );
+		
+		// remove WC strong password script
+		add_action( 'wp_print_scripts', array( $this, 'remove_wc_password_meter' ), 100 );
 	}
 
 
@@ -65,6 +68,17 @@ class WC_Dev_Helper {
 	 */
 	public function muzzle_woo_updater() {
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
+	}
+	
+	
+	/**
+	 * Removes the strong password meter / requirement from WC 2.5+
+	 * because these are dev shop passwords, not vodka drinks -- we like them weak
+	 *
+	 * @since 0.3.0
+	 */
+	public function remove_wc_password_meter() {
+		wp_dequeue_script( 'wc-password-strength-meter' );
 	}
 
 
