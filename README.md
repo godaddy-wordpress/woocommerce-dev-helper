@@ -14,11 +14,11 @@ We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your
 Adds a "renew" link to each subscription under WooCommerce > Subscriptions for easy renewal processing. This is particularly useful for testing
 payment gateways that supports subscriptions.
 
-Allows a minutes and hours-long Subscription periods for quicker testing.
+Allows minutes and hours-long Subscription periods for quicker testing.
 
 ### Memberships
 
-Allows a minutes and hours-long Membership length for quicker testing.
+Allows minutes and hours-long Membership lengths for quicker testing.
 
 ### Global Functions
 
@@ -42,7 +42,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 ### 0.4.0 - 2016.06.06
  * Feature - Added minutes and hours Subscription periods for quicker Subscriptions testing
  * Feature - Added Memberships support with minutes and hours Memberships periods for quicker access and dripping testing
- * Feature = Added `wp_print_r` helper function
+ * Feature - Added `wp_print_r()` helper function
 
 ### 0.3.0 - 2015.12.28
  * Feature - Removes WooCommerce 2.5+ strong password requirement for customer registration
