@@ -16,7 +16,7 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) or exit;
 
 /**
  * Subscriptions Class
@@ -36,7 +36,7 @@ class WC_Dev_Helper_Subscriptions {
 	 */
 	public function __construct() {
 
-		// Without this, and when using forwarded URLs, WC Subscriptions believes the site to be "duplicate" and disables updating the payment method
+		// without this, and when using forwarded URLs, WC Subscriptions believes the site to be "duplicate" and disables updating the payment method
 		add_filter( 'woocommerce_subscriptions_is_duplicate_site', '__return_false' );
 
 		// add the renew action to the Subscriptions list table
@@ -46,13 +46,19 @@ class WC_Dev_Helper_Subscriptions {
 			add_filter( 'woocommerce_subscriptions_list_table_actions', array( $this, 'add_renew_action' ), 10, 2 );
 		}
 
-		// process the renewa action
+		// process the renewal action
 		if ( $this->is_subs_gte_2_0() ) {
 			add_action( 'load-edit.php', array( $this, 'process_renew_action' ) );
 			add_action( 'admin_notices', array( $this, 'maybe_render_renewal_success_message' ) );
 		} else {
 			add_action( 'load-woocommerce_page_subscriptions', array( $this, 'process_pre_subs_2_0_renew_action' ) );
 		}
+
+		// add support for minutes and hours-long Subscription period for quicker testing
+		add_filter( 'woocommerce_subscription_available_time_periods', array( $this, 'new_subscription_periods' ) );
+		add_filter( 'woocommerce_subscription_periods',                array( $this, 'new_subscription_periods' ) );
+		add_filter( 'woocommerce_subscription_trial_periods',          array( $this, 'new_subscription_periods' ) );
+		add_filter( 'woocommerce_subscription_lengths',                array( $this, 'new_subscription_lengths' ) );
 	}
 
 
@@ -208,6 +214,55 @@ class WC_Dev_Helper_Subscriptions {
 	protected function is_subs_gte_2_0() {
 
 		return version_compare( WC_Subscriptions::$version, '1.6.0', '>' );
+	}
+
+
+	/**
+	 * Add the minute / hour into available subscription period options
+	 *
+	 * @since 0.4.0
+	 * @param array $subscription_periods associative array of available periods
+	 * @return array with updated periods
+	 */
+	public function new_subscription_periods( $subscription_periods ) {
+
+		$new_periods = array(
+			'minute' => 'minute',
+			'hour'	 => 'hour',
+		);
+
+		return array_merge( $new_periods, $subscription_periods);
+	}
+
+
+	/**
+	 * Add subscription lengths for our new "minute" and "hour" period
+	 *
+	 * @since 0.4.0
+	 * @param array $lengths associative array of available lengths
+	 * @return array - updated lengths
+	 */
+	public function new_subscription_lengths( $lengths ) {
+		// start range with 0 => all time
+		$minute_durations = array( 'all time', '1 minute' );
+		$minute_steps = range( 5, 60, 5 );
+
+		// add possible steps for subscription duration
+		foreach( $minute_steps as $number ) {
+			$minute_durations[ $number ] = $number . ' minutes';
+		}
+
+		$hour_durations = array( 'all time', '1 hour' );
+		$hour_steps = range( 2, 6 );
+
+		foreach ( $hour_steps as $number ) {
+			$hour_durations[ $number ] = $number . ' hours';
+		}
+
+		$lengths['minute'] = $minute_durations;
+		$lengths['hour'] = $hour_durations;
+
+		return $lengths;
 	}
 
 

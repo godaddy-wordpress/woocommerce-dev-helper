@@ -1,14 +1,14 @@
 {
-	"name": "woocommerce-customizer",
-	"version": "1.2.1",
+	"name": "woocommerce-dev-helper",
+	"version": "0.4.0",
 	"author": "SkyVerge Team",
 	"homepage": "http://www.skyverge.com",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/skyverge/woocommerce-customizer.git"
+		"url": "https://github.com/skyverge/woocommerce-dev-helper.git"
 	},
 	"bugs": {
-		"url": "https://github.com/skyverge/woocommerce-customizer/issues"
+		"url": "https://github.com/skyverge/woocommerce-dev-helper/issues"
 	},
 	"engines": {
 		"node": ">= 0.10.0"

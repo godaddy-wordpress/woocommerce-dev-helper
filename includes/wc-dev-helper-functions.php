@@ -16,7 +16,7 @@
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-defined( 'ABSPATH' ) || exit;
+defined( 'ABSPATH' ) or exit;
 
 
 if ( ! function_exists( 'wp_debug_backtrace' ) ) :
@@ -25,7 +25,7 @@ if ( ! function_exists( 'wp_debug_backtrace' ) ) :
 	 * Helper function for the PHP debug_backtrace() function.
 	 * This is based on the Magento mageDebugBacktrace() function.
 	 *
-	 * Example usage: error_log(wp_debug_backtrace());
+	 * Example usage: error_log( wp_debug_backtrace() );
 	 *
 	 * @since 0.1.0
 	 * @param bool $return if true, returns the output, otherwise echo's
@@ -76,7 +76,7 @@ if ( ! function_exists( 'wp_var_dump' ) ) :
 	 *        directive, null leaves it untouched.  Useful when dumping variables
 	 *        to the command line with Xdebug installed and html formatting is
 	 *        not desired.
-	 * @return mixed Returns a string if $return is true, void otherwise
+	 * @return void|string Returns a string if $return is true, void otherwise
 	 */
 	function wp_var_dump( $var, $return = true, $html_errors = false ) {
 
@@ -109,7 +109,7 @@ if ( ! function_exists( 'wp_var_log' ) ) :
 	/**
 	 * print_r or var_dump a variable to the error log, useful for logging.
 	 *
-	 * example usage: wp_var_log( $var )
+	 * example usage: wp_var_log( $var );
 	 *
 	 * @since 0.1.0
 	 * @param mixed $var variable to log
@@ -123,6 +123,25 @@ if ( ! function_exists( 'wp_var_log' ) ) :
 		} else {
 			error_log( print_r( $var, true ) );
 		}
+	}
+
+endif;
+
+
+if ( ! function_exists( 'wp_print_r' ) ) :
+	
+	/**
+	 * Print human-readable information about a variable
+	 * wrapping it in pre-formatted HTML tags
+	 * 
+	 * example usage: wp_print_r( $var );
+	 *
+	 * @since 0.4.0
+	 * @param $var
+	 */
+	function wp_print_r( $var ) {
+		
+		echo '<pre>'; print_r( $var ); echo '</pre>';
 	}
 
 endif;

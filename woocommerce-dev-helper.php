@@ -5,11 +5,11 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.3.0
+ * Version: 0.4.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2015 SkyVerge [info@skyverge.com]
+ * Copyright: (c) 2015-2016 SkyVerge [info@skyverge.com]
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -17,11 +17,11 @@
  * @package   WooCommerce-Dev-Helper
  * @author    SkyVerge
  * @category  Development
- * @copyright Copyright (c) 2012-2015, SkyVerge
+ * @copyright Copyright (c) 2012-2016, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
-defined( 'ABSPATH' ) || exit; // Exit if accessed directly
+defined( 'ABSPATH' ) or exit;
 
 class WC_Dev_Helper {
 
@@ -34,6 +34,9 @@ class WC_Dev_Helper {
 
 	/** @var \WC_Dev_Helper_Subscriptions instance */
 	protected $subscriptions;
+
+	/** @var \WC_Dev_Helper_Memberships instance */
+	protected $memberships;
 
 
 	/**
@@ -54,7 +57,7 @@ class WC_Dev_Helper {
 
 		// maybe log actions/filters
 		add_action( 'shutdown', array( $this, 'maybe_log_hooks' ) );
-		
+
 		// remove WC strong password script
 		add_action( 'wp_print_scripts', array( $this, 'remove_wc_password_meter' ), 100 );
 	}
@@ -69,8 +72,8 @@ class WC_Dev_Helper {
 	public function muzzle_woo_updater() {
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
 	}
-	
-	
+
+
 	/**
 	 * Removes the strong password meter / requirement from WC 2.5+
 	 * because these are dev shop passwords, not vodka drinks -- we like them weak
@@ -93,10 +96,18 @@ class WC_Dev_Helper {
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
 		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
 
-		if ( class_exists( 'WC_Subscriptions' ) ) {
+		if ( $this->is_plugin_active( 'woocommerce-subscriptions.php' ) ) {
+
 			// Subscriptions helper
 			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-subscriptions.php' );
 			$this->subscriptions = new WC_Dev_Helper_Subscriptions();
+		}
+
+		if ( $this->is_plugin_active( 'woocommerce-memberships.php' ) ) {
+
+			// Memberships helper
+			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-memberships.php' );
+			$this->memberships = new WC_Dev_Helper_Memberships();
 		}
 	}
 
@@ -112,7 +123,7 @@ class WC_Dev_Helper {
 	 *
 	 * @since 0.1.0
 	 */
-	function maybe_log_hooks() {
+	public function maybe_log_hooks() {
 
 		$hooks = array();
 
@@ -153,6 +164,40 @@ class WC_Dev_Helper {
 	}
 
 
+	/**
+	 * Helper function to determine whether a plugin is active
+	 *
+	 * @since 0.4.0
+	 * @param string $plugin_name plugin name, as the plugin-filename.php
+	 * @return bool
+	 */
+	public function is_plugin_active( $plugin_name ) {
+
+		$active_plugins = (array) get_option( 'active_plugins', array() );
+
+		if ( is_multisite() ) {
+			$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
+		}
+
+		$plugin_filenames = array();
+
+		foreach ( $active_plugins as $plugin ) {
+
+			if ( strpos( $plugin, '/' ) ) {
+				// normal plugin name (plugin-dir/plugin-filename.php)
+				list( , $filename ) = explode( '/', $plugin );
+			} else {
+				// no directory, just plugin file
+				$filename = $plugin;
+			}
+
+			$plugin_filenames[] = $filename;
+		}
+
+		return in_array( $plugin_name, $plugin_filenames, true );
+	}
+
+
 	/** Instance Getters ******************************************************/
 
 
@@ -175,6 +220,17 @@ class WC_Dev_Helper {
 	 */
 	public function subscriptions() {
 		return $this->subscriptions;
+	}
+
+
+	/**
+	 * Return the Memberships class instance
+	 *
+	 * @since 0.4.0
+	 * @return \WC_Dev_Helper_Memberships
+	 */
+	public function memberships() {
+		return $this->memberships;
 	}
 
 
