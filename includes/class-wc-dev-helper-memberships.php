@@ -35,18 +35,15 @@ class WC_Dev_Helper_Memberships {
 	 */
 	public function __construct() {
 
-		if ( is_admin() && ! is_ajax() ) {
-
-			add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
-		}
+        add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
 	}
 
 
 	/**
 	 * Allow minutes and hours-long access period options for plans
 	 *
-	 * @since 1.6.0-1
-	 * @param array $periods
+	 * @since 0.4.0
+	 * @param array $periods Associative array of period lengths
 	 * @return array
 	 */
 	public function add_membership_plan_access_period_options( $periods ) {
