@@ -35,7 +35,7 @@ class WC_Dev_Helper_Memberships {
 	 */
 	public function __construct() {
 
-        add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
+		add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
 	}
 
 
