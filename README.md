@@ -39,6 +39,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.4.1 - 2016.10.18
+ * Fix - Minutes and hours-long periods in membership plans did not work properly or when creating a user membership in admin and setting the length from the membership plan default 
+
 ### 0.4.0 - 2016.06.06
  * Feature - Added minutes and hours Subscription periods for quicker Subscriptions testing
  * Feature - Added Memberships support with minutes and hours Memberships periods for quicker access and dripping testing
