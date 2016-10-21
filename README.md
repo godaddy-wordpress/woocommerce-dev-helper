@@ -39,6 +39,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.4.2 - 2016.10.21
+ * Tweak - Filter the human access length for membership plans that have a length in minutes or hours set via this helper plugin (Memberships 1.7.2+)  
+
 ### 0.4.1 - 2016.10.18
  * Fix - Minutes and hours-long periods in membership plans did not work properly or when creating a user membership in admin and setting the length from the membership plan default 
 

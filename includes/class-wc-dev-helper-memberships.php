@@ -35,7 +35,10 @@ class WC_Dev_Helper_Memberships {
 	 */
 	public function __construct() {
 
+		// add support for minutes and hours-long membership plans
 		add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
+		// filter the human access length information so it can work with minutes and hours
+		add_filter( 'wc_memberships_membership_plan_human_access_length', array( $this, 'filter_membership_human_access_length' ), 10, 2 );
 	}
 
 
@@ -54,6 +57,28 @@ class WC_Dev_Helper_Memberships {
 		);
 
 		return array_merge( $new_periods, $periods );
+	}
+
+
+	/**
+	 * Display a human friendly format for the access length when it's minutes or hours-long
+	 *
+	 * @since 0.4.2
+	 * @param string $human_length The human length
+	 * @param string $standard_length The length in the standard machine-friendly format
+	 * @return string
+	 */
+	public function filter_membership_human_access_length( $human_length, $standard_length ) {
+
+		$has_minutes = strpos( $standard_length, 'minute' ) !== false;
+		$has_hours   = strpos( $standard_length, 'hour' )   !== false;
+
+		if ( $has_minutes || $has_hours ) {
+
+			$human_length = $standard_length;
+		}
+
+		return $human_length;
 	}
 
 
