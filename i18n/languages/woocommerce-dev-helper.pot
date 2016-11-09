@@ -2,7 +2,7 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Dev Helper 0.4.0\n"
+"Project-Id-Version: WooCommerce Dev Helper 0.4.2\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/skyverge/woocommerce-dev-helper/issues\n"
 "POT-Creation-Date: 2015-07-26 19:51:27+00:00\n"
