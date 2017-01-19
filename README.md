@@ -1,7 +1,7 @@
 WooCommerce Dev Helper
 ======================
 
-This is a simple and opinionated plugin for helping develop/debug WooCommerce & extensions.
+This is a simple and opinionated plugin for helping develop/debug WooCommerce & extensions. DO NOT USE ON A PRODUCTION SERVER.
 
 ### Use Forwarded URLs
 
@@ -26,6 +26,7 @@ Allows minutes and hours-long Membership lengths for quicker testing.
 * `wp_var_dump()` - helper for `var_dump`, allowing you to return the output instead of printing
 * `wp_var_log()` - helper for `error_log` that uses `print_r()` or optionally `wp_var_dump()`
 * `wp_print_r()` - helper for `print_r` that wraps the output in `<pre>` HTML tags
+* `wc_dev_session` - JS helper to get all the current session data in console
 
 ### Misc
 
@@ -39,11 +40,14 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.5.0 - 2017.01.19
+ * Feature - Dump the current session in AJAX to display in browser console
+
 ### 0.4.2 - 2016.10.21
- * Tweak - Filter the human access length for membership plans that have a length in minutes or hours set via this helper plugin (Memberships 1.7.2+)  
+ * Tweak - Filter the human access length for membership plans that have a length in minutes or hours set via this helper plugin (Memberships 1.7.2+)
 
 ### 0.4.1 - 2016.10.18
- * Fix - Minutes and hours-long periods in membership plans did not work properly or when creating a user membership in admin and setting the length from the membership plan default 
+ * Fix - Minutes and hours-long periods in membership plans did not work properly or when creating a user membership in admin and setting the length from the membership plan default
 
 ### 0.4.0 - 2016.06.06
  * Feature - Added minutes and hours Subscription periods for quicker Subscriptions testing

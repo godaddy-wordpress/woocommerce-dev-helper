@@ -12,7 +12,7 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -129,18 +129,18 @@ endif;
 
 
 if ( ! function_exists( 'wp_print_r' ) ) :
-	
+
 	/**
 	 * Print human-readable information about a variable
 	 * wrapping it in pre-formatted HTML tags
-	 * 
+	 *
 	 * example usage: wp_print_r( $var );
 	 *
 	 * @since 0.4.0
 	 * @param $var
 	 */
 	function wp_print_r( $var ) {
-		
+
 		echo '<pre>'; print_r( $var ); echo '</pre>';
 	}
 

@@ -5,11 +5,11 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.4.2
+ * Version: 0.5.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2015-2016 SkyVerge [info@skyverge.com]
+ * Copyright: (c) 2015-2017 SkyVerge [info@skyverge.com]
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -17,7 +17,7 @@
  * @package   WooCommerce-Dev-Helper
  * @author    SkyVerge
  * @category  Development
- * @copyright Copyright (c) 2012-2016, SkyVerge
+ * @copyright Copyright (c) 2012-2017, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -28,6 +28,9 @@ class WC_Dev_Helper {
 
 	/** @var \WC_Dev_Helper instance */
 	protected static $instance;
+
+	/** @var \WC_Dev_Helper_Ajax instance */
+	protected $ajax;
 
 	/** @var \WC_Dev_Helper_Use_Forwarded_URLs instance */
 	protected $use_forwarded_urls;
@@ -60,6 +63,9 @@ class WC_Dev_Helper {
 
 		// remove WC strong password script
 		add_action( 'wp_print_scripts', array( $this, 'remove_wc_password_meter' ), 100 );
+
+		// add some inline JS
+		add_action( 'wp_footer', array( $this, 'enqueue_scripts' ) );
 	}
 
 
@@ -86,11 +92,35 @@ class WC_Dev_Helper {
 
 
 	/**
+	 * Add inline JavaScript.
+	 *
+	 * @since 0.5.0
+	 */
+	public function enqueue_scripts() {
+
+		?>
+		<script type="text/javascript">
+				function wc_dev_get_session() {
+					jQuery.post( '<?php echo admin_url( 'admin-ajax.php' ); ?>', { action: 'wc_dev_helper_get_session' }, function( response ) {
+						console.log( response );
+					});
+				}
+		</script>
+		<?php
+	}
+
+
+	/**
 	 * Include required files
 	 *
 	 * @since 0.1.0
 	 */
 	public function includes() {
+
+		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-ajax.php' );
+		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
+			$this->ajax = new WC_Dev_Helper_Ajax();
+		}
 
 		// use forwarded URLs
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
