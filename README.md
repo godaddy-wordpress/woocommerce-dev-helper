@@ -20,6 +20,10 @@ Allows minutes and hours-long Subscription periods for quicker testing.
 
 Allows minutes and hours-long Membership lengths for quicker testing.
 
+### Bogus Gateway
+
+Adds a testing payment gateway that will call the `$order->payment_complete()` method to simulate a credit card payment.
+
 ### Global Functions
 
 * `wp_debug_backtrace()` - helper for using the `debug_backtrace()` function with a bit more sanity
@@ -39,6 +43,9 @@ Allows minutes and hours-long Membership lengths for quicker testing.
 Download and install just like any other WordPress plugin. If you want to be really fancy, symlink it into your installs instead.
 
 ## Changelog
+
+### 0.6.0 - 2017.02.18
+ * Feature - Adds a bogus gateway that calls `$order->payment_complete()` when used
 
 ### 0.5.0 - 2017.01.19
  * Feature - Dump the current session in AJAX to display in browser console

@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.5.0
+ * Version: 0.6.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
@@ -41,6 +41,9 @@ class WC_Dev_Helper {
 	/** @var \WC_Dev_Helper_Memberships instance */
 	protected $memberships;
 
+	/** @var \WC_Bogus_Gateway instance */
+	protected $gateway;
+
 
 	/**
 	 * Bootstrap class
@@ -66,6 +69,10 @@ class WC_Dev_Helper {
 
 		// add some inline JS
 		add_action( 'wp_footer', array( $this, 'enqueue_scripts' ) );
+		add_action( 'wp_head',   array( $this, 'bogus_gateway_styles' ) );
+
+		// add the testing gateway
+		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
 	}
 
 
@@ -111,6 +118,19 @@ class WC_Dev_Helper {
 
 
 	/**
+	 * Add the bogus gateway to WC available gateways.
+	 *
+	 * @since 0.6.0
+	 * @param array $gateways all available WC gateways
+	 * @return array updated gateways
+	 */
+	function add_bogus_gateway( $gateways ) {
+		$gateways[] = 'WC_Bogus_Gateway';
+		return $gateways;
+	}
+
+
+	/**
 	 * Include required files
 	 *
 	 * @since 0.1.0
@@ -118,8 +138,10 @@ class WC_Dev_Helper {
 	public function includes() {
 
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-ajax.php' );
+		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
 		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
-			$this->ajax = new WC_Dev_Helper_Ajax();
+			$this->ajax    = new WC_Dev_Helper_Ajax();
+			$this->gateway = new WC_Bogus_Gateway();
 		}
 
 		// use forwarded URLs
@@ -228,6 +250,23 @@ class WC_Dev_Helper {
 	}
 
 
+	/**
+	 * Adjust Bogus Gateway styles
+	 *
+	 * @since 0.6.0
+	 */
+	public function bogus_gateway_styles() {
+
+		if ( is_checkout() || is_checkout_pay_page() ) {
+			echo '<style type="text/css">
+			#payment .payment_methods li.payment_method_bogus_gateway img {
+				float: none !important;
+			}
+			</style>';
+		}
+	}
+
+
 	/** Instance Getters ******************************************************/
 
 
@@ -261,6 +300,17 @@ class WC_Dev_Helper {
 	 */
 	public function memberships() {
 		return $this->memberships;
+	}
+
+
+	/**
+	 * Return the gateway class instance
+	 *
+	 * @since 0.6.0
+	 * @return \WC_Bogus_Gateway
+	 */
+	public function gateway() {
+		return $this->gateway();
 	}
 
 
