@@ -76,13 +76,14 @@ class WC_Dev_Helper_Subscriptions {
 
 			$renew_url = add_query_arg(
 				array(
-					'post'     => $subscription->id,
+					'post'     => is_callable( array( $subscription, 'get_id' ) ) ? $subscription->get_id() : $subscription->id,
 					'action'   => 'renew',
 					'_wpnonce' => wp_create_nonce( 'bulk-posts' ),
 				)
 			);
 
 		} else {
+
 			$renew_url = add_query_arg(
 				array(
 					'page'         => $_REQUEST['page'],
@@ -199,7 +200,7 @@ class WC_Dev_Helper_Subscriptions {
 		}
 
 		$args['custom_action'] = true;
-		$args['messages'] = array( __( 'Subscription Renewal Processed', 'woocommerce-dev-helper' ) );
+		$args['messages']      = array( __( 'Subscription Renewal Processed', 'woocommerce-dev-helper' ) );
 
 		return $args;
 	}
@@ -243,9 +244,10 @@ class WC_Dev_Helper_Subscriptions {
 	 * @return array - updated lengths
 	 */
 	public function new_subscription_lengths( $lengths ) {
+
 		// start range with 0 => all time
 		$minute_durations = array( 'all time', '1 minute' );
-		$minute_steps = range( 5, 60, 5 );
+		$minute_steps     = range( 5, 60, 5 );
 
 		// add possible steps for subscription duration
 		foreach( $minute_steps as $number ) {
@@ -253,14 +255,14 @@ class WC_Dev_Helper_Subscriptions {
 		}
 
 		$hour_durations = array( 'all time', '1 hour' );
-		$hour_steps = range( 2, 6 );
+		$hour_steps     = range( 2, 6 );
 
 		foreach ( $hour_steps as $number ) {
 			$hour_durations[ $number ] = $number . ' hours';
 		}
 
 		$lengths['minute'] = $minute_durations;
-		$lengths['hour'] = $hour_durations;
+		$lengths['hour']   = $hour_durations;
 
 		return $lengths;
 	}

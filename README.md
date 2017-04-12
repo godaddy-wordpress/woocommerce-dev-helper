@@ -5,7 +5,7 @@ This is a simple and opinionated plugin for helping develop/debug WooCommerce & 
 
 ### Use Forwarded URLs
 
-Once activated, this plugin will make WordPress use HTTP_X_FORWARDED_HOST for all your links instead of your site URL. No configuration needed.
+Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` for all your links instead of your site URL. No configuration needed.
 
 We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your WordPress root.
 
@@ -14,11 +14,11 @@ We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your
 Adds a "renew" link to each subscription under WooCommerce > Subscriptions for easy renewal processing. This is particularly useful for testing
 payment gateways that supports subscriptions.
 
-Allows minutes and hours-long Subscription periods for quicker testing.
+Allows for minutes and hours-long Subscription periods for quicker testing.
 
 ### Memberships
 
-Allows minutes and hours-long Membership lengths for quicker testing.
+Allows for minutes and hours-long Membership lengths for quicker testing.
 
 ### Bogus Gateway
 
@@ -34,7 +34,7 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 
 ### Misc
 
-* Removes the WooThemes Updater notice
+* Removes the WooCommmerce Updater notice
 * Removes the strong password requirement for customer accounts
 * Helper for logging actions/filters fired during a page load -- simply add `?wcdh_hooks=actions|filters|all`, reload the page, and your desired hooks will be printed to the error log, along with the fired count
 
@@ -44,6 +44,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.7.0 - 2017.04.12
+ * Fix - Subscriptions integration throwing a warning in WooCommerce 3.0+
+ 
 ### 0.6.0 - 2017.02.18
  * Feature - Adds a bogus gateway that calls `$order->payment_complete()` when used
 

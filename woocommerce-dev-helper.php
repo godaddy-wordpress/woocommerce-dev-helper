@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.6.0
+ * Version: 0.7.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
@@ -138,9 +138,12 @@ class WC_Dev_Helper {
 	public function includes() {
 
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-ajax.php' );
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
 		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
 			$this->ajax    = new WC_Dev_Helper_Ajax();
+		}
+
+		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
+		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
 			$this->gateway = new WC_Bogus_Gateway();
 		}
 
@@ -352,7 +355,7 @@ class WC_Dev_Helper {
 	}
 
 
-}  // end \WC_Dev_Helper class
+}
 
 
 /**
