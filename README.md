@@ -22,7 +22,7 @@ Allows for minutes and hours-long Membership lengths for quicker testing.
 
 ### Bogus Gateway
 
-Adds a testing payment gateway that will call the `$order->payment_complete()` method to simulate a credit card payment.
+Adds a testing payment gateway that will call the `$order->payment_complete()` method to simulate a credit card payment. Can also be used for Subscriptions automatic renewals.
 
 ### Global Functions
 
@@ -45,6 +45,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 ## Changelog
 
 ### 0.7.0 - 2017.04.12
+ * Feature - Use the Bogus gateway for Subscriptions automatic renewals
  * Fix - Subscriptions integration throwing a warning in WooCommerce 3.0+
  
 ### 0.6.0 - 2017.02.18
