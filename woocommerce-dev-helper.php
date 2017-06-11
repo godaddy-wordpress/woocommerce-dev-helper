@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: WooCommerce Dev Helper
+ * Plugin Name: A WooCommerce Dev Helper
  * Plugin URI: https://github.com/skyverge/woocommerce-dev-helper/
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
@@ -75,6 +75,10 @@ class WC_Dev_Helper {
 
 		// add the testing gateway
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
+
+		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
+		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
+		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
 	}
 
 
@@ -148,10 +152,6 @@ class WC_Dev_Helper {
 			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
 			$this->gateway = new WC_Bogus_Gateway();
 		}
-
-		// use forwarded URLs
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
-		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
 
 		if ( $this->is_plugin_active( 'woocommerce-subscriptions.php' ) ) {
 

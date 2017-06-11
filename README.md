@@ -46,6 +46,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ### 0.7.0-dev - YYYY.MM.DD
  * Tweak - Remove dependency on WooCommerce
+ * Tweak - Add support for domain forwarding as early as possible
 
 ### 0.7.0 - 2017.04.12
  * Feature - Use the Bogus gateway for Subscriptions automatic renewals
