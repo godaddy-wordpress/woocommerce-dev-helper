@@ -44,6 +44,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.7.0-dev - YYYY.MM.DD
+ * Tweak - Remove dependency on WooCommerce
+
 ### 0.7.0 - 2017.04.12
  * Feature - Use the Bogus gateway for Subscriptions automatic renewals
  * Fix - Subscriptions integration throwing a warning in WooCommerce 3.0+
