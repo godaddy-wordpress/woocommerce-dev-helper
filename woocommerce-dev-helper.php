@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.7.1-dev
+ * Version: 0.8.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
@@ -76,6 +76,9 @@ class WC_Dev_Helper {
 		// add the testing gateway
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
 
+		// filter default Elavon test card
+		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
+
 		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
 		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
 		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
@@ -130,9 +133,29 @@ class WC_Dev_Helper {
 	 * @param array $gateways all available WC gateways
 	 * @return array updated gateways
 	 */
-	function add_bogus_gateway( $gateways ) {
+	public function add_bogus_gateway( $gateways ) {
 		$gateways[] = 'WC_Bogus_Gateway';
 		return $gateways;
+	}
+
+
+	/**
+	 * Changes the Elavon default payment form values.
+	 *
+	 * @since 0.8.0
+	 *
+	 * @param string[]  $defaults the gateway form defaults
+	 * @param \WC_Gateway_Elavon_Converge_Credit_Card $gateway gateway instance
+	 * @return string[] update default values
+	 */
+	public function change_elavon_test_values( $defaults, $gateway ) {
+
+		if ( $gateway->is_test_environment() ) {
+			$defaults['expiry']         = '12/19';
+			$defaults['account-number'] = '4124939999999990';
+		}
+
+		return $defaults;
 	}
 
 
