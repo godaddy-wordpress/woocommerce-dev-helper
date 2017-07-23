@@ -18,6 +18,10 @@
 
 defined( 'ABSPATH' ) or exit;
 
+if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+	return;
+}
+
 /**
  * Adds a testing gateway that calls the WooCommerce payment_complete() method.
  *
