@@ -69,6 +69,7 @@ class WC_Dev_Helper {
 
 		// add some inline JS
 		add_action( 'wp_footer', array( $this, 'enqueue_scripts' ) );
+
 		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
 			add_action( 'wp_head',   array( $this, 'bogus_gateway_styles' ) );
 		}
