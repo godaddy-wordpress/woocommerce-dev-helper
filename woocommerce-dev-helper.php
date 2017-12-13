@@ -88,12 +88,15 @@ class WC_Dev_Helper {
 
 	/**
 	 * Removes the "Please install Woo Updater" notice when an official WC extension
-	 * is active but the Woo Updater plugin is not
+	 * is active but the Woo Updater plugin is not.
+	 *
+	 * Also removes the WC 3.3+ "Connect to WooCommerce.com" notice.
 	 *
 	 * @since 0.1.0
 	 */
 	public function muzzle_woo_updater() {
 		remove_action( 'admin_notices', 'woothemes_updater_notice' );
+		add_filter( 'woocommerce_helper_suppress_admin_notices', '__return_true' );
 	}
 
 

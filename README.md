@@ -44,6 +44,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 0.8.1 - 2017.12.13
+ * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active
+
 ### 0.8.0 - 2017.07.22
  * Tweak - Remove dependency on WooCommerce
  * Tweak - Add support for domain forwarding as early as possible

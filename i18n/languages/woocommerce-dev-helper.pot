@@ -2,7 +2,7 @@
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: A WooCommerce Dev Helper 0.7.1-dev\n"
+"Project-Id-Version: A WooCommerce Dev Helper 0.8.0\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/skyverge/woocommerce-dev-helper/issues\n"
 "POT-Creation-Date: 2015-07-26 19:51:27+00:00\n"
@@ -97,11 +97,11 @@ msgstr ""
 msgid "Subscription Renewal Processed"
 msgstr ""
 
-#: woocommerce-dev-helper.php:346
+#: woocommerce-dev-helper.php:373
 msgid "You cannot clone instances of WooCommerce Dev Helper."
 msgstr ""
 
-#: woocommerce-dev-helper.php:356
+#: woocommerce-dev-helper.php:383
 msgid "You cannot unserialize instances of WooCommerce Dev Helper."
 msgstr ""
 
