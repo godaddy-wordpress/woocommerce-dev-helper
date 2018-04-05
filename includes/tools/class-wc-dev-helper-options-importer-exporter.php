@@ -336,26 +336,33 @@ class WC_Dev_Helper_Import_Export_Options {
 		if ( isset( $file['error'] ) ) {
 			$this->import_error = esc_html( $file['error'] );
 		} elseif ( ! isset( $file['file'], $file['id'] ) ) {
-			$this->import_error = __( 'The file did not upload properly. Please try again.', 'woocommerce-dev-helper' );
+			$this->import_error = esc_html__( 'The file did not upload properly. Please try again.', 'woocommerce-dev-helper' );
 		}
 
 		$this->import_file_id = absint( $file['id'] );
 
 		if ( ! file_exists( $file['file'] ) ) {
+
 			wp_import_cleanup( $this->import_file_id );
+
+			/* translators: Placeholder: %s - option name */
 			$this->import_error = sprintf( __( 'The export file could not be found at %s. It is likely that this was caused by a permissions problem.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $file['file'] ) . '</code>' );
 		}
 
 		if ( ! is_file( $file['file'] ) ) {
+
 			wp_import_cleanup( $this->import_file_id );
-			$this->import_error = __( 'Invalid file, please try again.', 'woocommerce-dev-helper' );
+
+			$this->import_error = esc_html__( 'Invalid file, please try again.', 'woocommerce-dev-helper' );
 		}
 
 		$file_contents = file_get_contents( $file['file'] );
 
 		if ( empty( $file_contents ) ) {
+
 			wp_import_cleanup( $this->import_file_id );
-			$this->import_error = __( 'Import file empty or invalid.', 'woocommerce-dev-helper' );
+
+			$this->import_error = esc_html__( 'Import file empty or invalid.', 'woocommerce-dev-helper' );
 		}
 
 		if ( empty( $this->import_error ) ) {
@@ -435,10 +442,10 @@ class WC_Dev_Helper_Import_Export_Options {
 
 				$( '.which-options' ).on( 'change', function() {
 
-					if ( 'all' === $( this ).val() ) {
-						$( '#option_importer_details' ).hide();
-					} else {
+					if ( 'specific' === $( this ).val() ) {
 						$( '#option_importer_details' ).show();
+					} else {
+						$( '#option_importer_details' ).hide();
 					}
 				} );
 
@@ -487,6 +494,15 @@ class WC_Dev_Helper_Import_Export_Options {
 						value="all"
 						checked="checked"
 					/> <?php esc_html_e( 'All Options', 'woocommerce-dev-helper' ); ?>
+				</label>
+				<br />
+				<label>
+					<input
+						type="radio"
+						class="which-options"
+						name="settings[which_options]"
+						value="woocommerce"
+					/> <?php esc_html_e( 'WooCommerce Options', 'woocommerce-dev-helper' ); ?>
 				</label>
 				<br />
 				<label>
@@ -624,16 +640,27 @@ class WC_Dev_Helper_Import_Export_Options {
 		$imported = $processed = $skipped = 0;
 
 		if ( empty( $_POST['settings']['which_options'] ) ) {
-			$this->import_error = esc_html( 'An error occurred during the import form submission. Please try again.', 'woocommerce-dev-helper' );
+			$this->import_error = esc_html__( 'An error occurred during the import form submission. Please try again.', 'woocommerce-dev-helper' );
 		}
 
 		if ( empty( $this->import_data ) || ! is_array( $this->import_data ) ) {
-			$this->import_error = esc_html( 'The data to import appears empty or invalid.', 'woocommerce-dev-helper' );
+			$this->import_error = esc_html__( 'The data to import appears empty or invalid.', 'woocommerce-dev-helper' );
 		}
 
 		if ( 'all' === $_POST['settings']['which_options'] ) {
 
 			$options_to_import = array_keys( $this->import_data );
+
+		} elseif ( 'woocommerce' === $_POST['settings']['which_options'] ) {
+
+			// loosely grab options that may belong to WooCommerce and its extensions
+			foreach ( array_keys( $this->import_data ) as $option_name ) {
+
+				if ( 0 === strpos( $option_name, 'wc_' ) || 0 === strpos( $option_name, 'woocommerce' ) ) {
+
+					$options_to_import[] = $option_name;
+				}
+			}
 
 		} elseif ( 'specific' === $_POST['settings']['which_options'] ) {
 
@@ -646,7 +673,7 @@ class WC_Dev_Helper_Import_Export_Options {
 
 		if ( empty( $this->import_error ) ) {
 
-			$import_data       = (array) $this->import_data;
+			$import_data       = $this->import_data;
 			$overwrite_options = ( ! empty( $_POST['settings']['overwrite'] ) && '1' === $_POST['settings']['overwrite'] );
 			$replace_urls      = ( ! empty( $_POST['settings']['replace'] ) && '1' === $_POST['settings']['replace'] );
 			$option_not_set    = uniqid( 'wc_dev_helper_unset_option', false );
@@ -669,6 +696,7 @@ class WC_Dev_Helper_Import_Export_Options {
 
 					if ( in_array( $option_name, $exclude_options, true ) ) {
 
+						/* translators: Placeholder: %s - option name */
 						echo "\n<p>" . sprintf( __( 'Skipped excluded option %s.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $option_name ) . '</code>' ) . '</p>';
 						continue;
 					}
@@ -681,6 +709,7 @@ class WC_Dev_Helper_Import_Export_Options {
 						// only import the setting if it's not present
 						if ( $old_value !== $option_not_set ) {
 
+							/* translators: Placeholder: %s - option name */
 							echo "\n<p>" . sprintf( __( 'Skipped option %s because it currently exists and overwriting is disabled.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $option_name ) . '</code>' ) . '</p>';
 							continue;
 						}
@@ -705,10 +734,12 @@ class WC_Dev_Helper_Import_Export_Options {
 
 				} elseif ( 'specific' === $_POST['settings']['which_options'] ) {
 
+					/* translators: Placeholder: %s - option name */
 					echo "\n<p>" . sprintf( __( 'Failed to import option %s; it does not seem to be in the import file.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $option_name ) . '</code>' ) . '</p>';
 
 				} else {
 
+					/* translators: Placeholder: %s - option name */
 					echo "\n<p>" . sprintf( __( 'Failed to import option %s.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $option_name ) . '</code>' ) . '</p>';
 				}
 			}
@@ -717,17 +748,27 @@ class WC_Dev_Helper_Import_Export_Options {
 
 			if ( $processed > 0 ) {
 
+				if ( $imported > 0 ) {
+					echo "\n<h3>" . __( 'Import successful!', 'woocommerce-dev-helper' ) . '</h3>';
+				} else {
+					echo "\n<h3>" . __( 'Import unsuccessful!', 'woocommerce-dev-helper' ) . '</h3>';
+				}
+
 				if ( $imported < $processed ) {
-					echo "\n<p><strong>" . sprintf( _n( '%d option processed.', '%d options processed.', $processed, 'woocommerce-dev-helper' ), $processed ) . '</strong></p>';
+					/* translators: Placeholder: %d - number of options */
+					echo "\n<p><strong>" . sprintf( _n( '%d option processed for import.', '%d options processed for import.', $processed, 'woocommerce-dev-helper' ), $processed ) . '</strong></p>';
 				}
 
 				if ( $skipped > 0 ) {
+					/* translators: Placeholder: %d - number of options */
 					echo "\n<p><strong>" . sprintf( _n( '%d option skipped.', '%d options skipped.', $skipped, 'woocommerce-dev-helper' ), $skipped ) . '</strong></p>';
 				}
 
 				if ( $imported > 0 ) {
+					/* translators: Placeholder: %d - number of options */
 					echo "\n<p><strong>" . sprintf( _n( '%d option imported.', '%d options imported.', $imported, 'woocommerce-dev-helper' ), $imported ) . '</strong></p>';
 				} else {
+					/* translators: Placeholder: %d - number of options */
 					echo "\n<p><strong>" . esc_html__( 'No options were successfully imported.', 'woocommerce-dev-helper' ) . '</strong></p>';
 				}
 
