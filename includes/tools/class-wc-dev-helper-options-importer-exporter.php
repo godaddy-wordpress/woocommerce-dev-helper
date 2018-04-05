@@ -334,38 +334,43 @@ class WC_Dev_Helper_Import_Export_Options {
 		$success = false;
 
 		if ( isset( $file['error'] ) ) {
+
 			$this->import_error = esc_html( $file['error'] );
+
 		} elseif ( ! isset( $file['file'], $file['id'] ) ) {
+
 			$this->import_error = esc_html__( 'The file did not upload properly. Please try again.', 'woocommerce-dev-helper' );
+
+		} else {
+
+			$this->import_file_id = absint( $file['id'] );
+
+			if ( ! file_exists( $file['file'] ) ) {
+
+				wp_import_cleanup( $this->import_file_id );
+
+				/* translators: Placeholder: %s - option name */
+				$this->import_error = sprintf( __( 'The export file could not be found at %s. It is likely that this was caused by a permissions problem.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $file['file'] ) . '</code>' );
+			}
+
+			if ( ! is_file( $file['file'] ) ) {
+
+				wp_import_cleanup( $this->import_file_id );
+
+				$this->import_error = esc_html__( 'Invalid file, please try again.', 'woocommerce-dev-helper' );
+			}
+
+			$file_contents = file_get_contents( $file['file'] );
+
+			if ( empty( $file_contents ) ) {
+
+				wp_import_cleanup( $this->import_file_id );
+
+				$this->import_error = esc_html__( 'Import file empty or invalid.', 'woocommerce-dev-helper' );
+			}
 		}
 
-		$this->import_file_id = absint( $file['id'] );
-
-		if ( ! file_exists( $file['file'] ) ) {
-
-			wp_import_cleanup( $this->import_file_id );
-
-			/* translators: Placeholder: %s - option name */
-			$this->import_error = sprintf( __( 'The export file could not be found at %s. It is likely that this was caused by a permissions problem.', 'woocommerce-dev-helper' ), '<code>' . esc_html( $file['file'] ) . '</code>' );
-		}
-
-		if ( ! is_file( $file['file'] ) ) {
-
-			wp_import_cleanup( $this->import_file_id );
-
-			$this->import_error = esc_html__( 'Invalid file, please try again.', 'woocommerce-dev-helper' );
-		}
-
-		$file_contents = file_get_contents( $file['file'] );
-
-		if ( empty( $file_contents ) ) {
-
-			wp_import_cleanup( $this->import_file_id );
-
-			$this->import_error = esc_html__( 'Import file empty or invalid.', 'woocommerce-dev-helper' );
-		}
-
-		if ( empty( $this->import_error ) ) {
+		if ( $this->import_file_id && empty( $this->import_error ) && ! empty( $file_contents ) ) {
 
 			$this->import_data = json_decode( $file_contents, true );
 
@@ -391,7 +396,7 @@ class WC_Dev_Helper_Import_Export_Options {
 		<div class="error" style="margin: 20px 0 30px;">
 			<p><?php printf( __( '%1$sError:%2$s %3$s', 'woocommerce-dev-helper' ), '<strong>', '</strong>', $this->import_error ); ?></p>
 		</div>
-		<div class="narrow">
+		<div>
 			<p><a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?import=wc-dev-helper-wordpress-options-import' ) ); ?>"><?php esc_html_e( 'Return to File Upload', 'woocommerce-dev-helper' ); ?></a></p>
 		</div>
 		<?php
@@ -679,9 +684,10 @@ class WC_Dev_Helper_Import_Export_Options {
 			$option_not_set    = uniqid( 'wc_dev_helper_unset_option', false );
 			$exclude_options   = $this->get_excluded_options( 'import' );
 
-			if ( $replace_urls && isset( $import_data['siteurl']['value'] ) ) {
+			if ( $replace_urls && isset( $import_data['siteurl']['value'] ) && is_string( $import_data['siteurl']['value'] ) ) {
 				$import_site_url  = trim( $import_data['siteurl']['value'] );
 				$this_site_url    = trim( get_bloginfo( 'url' ) );
+				$replace_urls     = $import_site_url !== $this_site_url;
 			} else {
 				$import_site_url  = '';
 				$this_site_url    = '';
@@ -776,6 +782,12 @@ class WC_Dev_Helper_Import_Export_Options {
 
 				echo "\n<p><strong>" . esc_html__( 'No options were successfully imported.', 'woocommerce-dev-helper' ) . '</strong></p>';
 			}
+
+			?>
+			<div>
+				<p><a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?import=wc-dev-helper-wordpress-options-import' ) ); ?>"><?php esc_html_e( 'Import another file', 'woocommerce-dev-helper' ); ?></a></p>
+			</div>
+			<?php
 
 		} else {
 
