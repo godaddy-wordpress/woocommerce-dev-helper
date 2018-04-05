@@ -12,17 +12,22 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 defined( 'ABSPATH' ) or exit;
 
+/**
+ * AJAX handler.
+ *
+ * @since 0.5.0
+ */
 class WC_Dev_Helper_Ajax {
 
 
 	/**
-	 * Add AJAX actions.
+	 * Adds AJAX actions.
 	 *
 	 * @since 0.5.0
 	 */
@@ -34,14 +39,14 @@ class WC_Dev_Helper_Ajax {
 
 
 	/**
-	 * Get session data from WooCommerce for the current user.
+	 * Gets session data from WooCommerce for the current user.
 	 *
 	 * @since 0.5.0
 	 */
 	public function get_session_data() {
 
 		/* @type \WC_Session_Handler $session_handler */
-		$session_handler = WC()->session;
+		$session_handler = wc()->session;
 
 		wp_send_json( $session_handler->get_session_data() );
 	}

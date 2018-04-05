@@ -12,7 +12,7 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -34,7 +34,7 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Setup filters
+	 * Sets up filters.
 	 *
 	 * @since 0.1.0
 	 */
@@ -109,9 +109,10 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Returns true if forwarding URLs
+	 * Returns true if forwarding URLs.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @return bool
 	 */
 	private function has_forwarded_host() {
@@ -121,9 +122,10 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Returns the forwarded host
+	 * Returns the forwarded host.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @return string
 	 */
 	public function get_forwarded_host() {
@@ -133,13 +135,12 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Replace incoming content with non-forwarded URLs converted to
-	 * the forwarded URL
+	 * Replaces incoming content with non-forwarded URLs converted to the forwarded URL.
 	 *
-	 * Note this does not attempt to convert protocols, instead it relies on
-	 * WordPress handling protocol changes properly
+	 * Note: this does not attempt to convert protocols, instead it relies on WordPress handling protocol changes properly.
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param mixed $content
 	 * @return mixed
 	 */

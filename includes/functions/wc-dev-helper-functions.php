@@ -12,7 +12,7 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
@@ -64,19 +64,22 @@ endif;
 if ( ! function_exists( 'wp_var_dump' ) ) :
 
 	/**
+	 * Dumps a variable by returning or echoing it.
+	 *
 	 * Helper function for the PHP var_dump() function, allowing you to return
 	 * the output, rather than printing.  Useful for logging.
 	 *
 	 * Example usage: error_log( wp_var_dump( $foo ) );
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param mixed $var the variable to dump
-	 * @param bool $return if true, returns the vardump; defaults to true
+	 * @param bool $return if true, returns the var dump; defaults to true
 	 * @param bool $html_errors true or false enables or disables the html_errors
 	 *        directive, null leaves it untouched.  Useful when dumping variables
 	 *        to the command line with Xdebug installed and html formatting is
 	 *        not desired.
-	 * @return void|string Returns a string if $return is true, void otherwise
+	 * @return void|string returns a string if $return is true, void otherwise
 	 */
 	function wp_var_dump( $var, $return = true, $html_errors = false ) {
 
@@ -107,14 +110,14 @@ endif;
 if ( ! function_exists( 'wp_var_log' ) ) :
 
 	/**
-	 * print_r or var_dump a variable to the error log, useful for logging.
+	 * Outputs a variable via print_r or var_dump to the error log, useful for logging.
 	 *
-	 * example usage: wp_var_log( $var );
+	 * Example usage: wp_var_log( $var );
 	 *
 	 * @since 0.1.0
+	 *
 	 * @param mixed $var variable to log
 	 * @param bool $dump use wp_var_dump() instead of print_r(), default false
-	 * @return string
 	 */
 	function wp_var_log( $var, $dump = false ) {
 
@@ -131,12 +134,12 @@ endif;
 if ( ! function_exists( 'wp_print_r' ) ) :
 
 	/**
-	 * Print human-readable information about a variable
-	 * wrapping it in pre-formatted HTML tags
+	 * Prints human-readable information about a variable wrapping it in pre-formatted HTML tags.
 	 *
 	 * example usage: wp_print_r( $var );
 	 *
 	 * @since 0.4.0
+	 *
 	 * @param $var
 	 */
 	function wp_print_r( $var ) {

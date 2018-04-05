@@ -24,6 +24,10 @@ Allows for minutes and hours-long Membership lengths for quicker testing.
 
 Adds a testing payment gateway that will call the `$order->payment_complete()` method to simulate a credit card payment. Can also be used for Subscriptions automatic renewals.
 
+### Import and Export options
+
+A WordPress importer and exporter of options from the `wp_options` table, useful to quickly import third party settings to help replicating bugs and testing scenarios.
+
 ### Global Functions
 
 * `wp_debug_backtrace()` - helper for using the `debug_backtrace()` function with a bit more sanity
@@ -43,6 +47,9 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 Download and install just like any other WordPress plugin. If you want to be really fancy, symlink it into your installs instead.
 
 ## Changelog
+
+### 0.9.0 - 2018.04.05
+ * Feature - Add a `wp_options` table importer and exporter tool
 
 ### 0.8.1 - 2017.12.13
  * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active
