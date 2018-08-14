@@ -12,11 +12,15 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+namespace SkyVerge\WooCommerce\Dev_Helper\Gateways;
+
 defined( 'ABSPATH' ) or exit;
+
+use SkyVerge\WooCommerce\PluginFramework\v5_2_0 as Framework;
 
 if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 	return;
@@ -25,14 +29,19 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
 /**
  * Adds a testing gateway that calls the WooCommerce payment_complete() method.
  *
- * @since 0.6.0
+ * @since 1.0.0
  */
-class WC_Bogus_Gateway extends WC_Payment_Gateway {
+class Bogus extends \WC_Payment_Gateway {
+
+
+	/** @var string whether Subscriptions support is enabled (yes/no) */
+	private $subscriptions;
+
 
 	/**
-	 * Constructor for the gateway.
+	 * Gateway Constructor.
 	 *
-	 * @since 0.6.0
+	 * @since 1.0.0
 	 */
 	public function __construct() {
 
@@ -53,7 +62,7 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 
 		if ( $this->subscriptions_available() ) {
 
-			// Subscriptions support
+			// WooCommerce Subscriptions support
 			$this->supports = array_merge( $this->supports,
 				array(
 					'subscriptions',
@@ -69,10 +78,10 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 			);
 		}
 
-		// Save settings
+		// save settings
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		// Process renewal orders
+		// process renewal orders
 		if ( ! has_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'process_renewal_payment' ) ) ) {
 			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'process_renewal_payment' ), 10, 2 );
 		}
@@ -80,9 +89,9 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 
 
 	/**
-	 * Initialize gateway settings form fields.
+	 * Initializes gateway settings form fields.
 	 *
-	 * @since 0.6.0
+	 * @since 1.0.0
 	 */
 	public function init_form_fields() {
 
@@ -126,18 +135,21 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Returns true if Subscriptions support is enabled.
 	 *
-	 * @since 0.7.0
+	 * @since 1.0.0
+	 *
 	 * @return bool
 	 */
 	public function subscriptions_available() {
+
 		return 'yes' === $this->subscriptions;
 	}
 
 
 	/**
-	 * Process the payment and return the result.
+	 * Processes the payment and return the result.
 	 *
-	 * @since 0.6.0
+	 * @since 1.0.0
+	 *
 	 * @param int $order_id
 	 * @return array
 	 */
@@ -145,17 +157,17 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 
 		$order = wc_get_order( $order_id );
 
-		// Update order status and add a transaction note
+		// update order status and add a transaction note
 		$order->payment_complete();
 		$order->add_order_note( __( 'Bogus is always approved &#128526;', 'woocommerce-dev-helper' ) );
 
-		// Remove cart
-		WC()->cart->empty_cart();
+		// remove cart
+		wc()->cart->empty_cart();
 
-		// Return thank you redirect
+		// return thank you redirect
 		return array(
-			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'result'   => 'success',
+			'redirect' => $this->get_return_url( $order )
 		);
 	}
 
@@ -163,15 +175,17 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Processes a renewal payment automatically.
 	 *
-	 * @since 0.7.0
-	 * @param float $amount_to_charge subscription amount to charge, could include
-	 *              multiple renewals if they've previously failed and the admin
-	 *              has enabled it
-	 * @param WC_Order $order original order containing the subscription
+	 * @internal
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param float $amount_to_charge subscription amount to charge, could include multiple renewals if they've previously failed and the admin has enabled it
+	 * @param \WC_Order $order original order containing the subscription
 	 */
 	public function process_renewal_payment( $amount_to_charge, $order ) {
 
 		$order->payment_complete();
+
 		$order->add_order_note( __( 'Renewal order processed. Bogus is always approved &#128526;', 'woocommerce-dev-helper' ) );
 	}
 

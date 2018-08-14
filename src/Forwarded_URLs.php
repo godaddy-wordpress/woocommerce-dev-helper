@@ -10,23 +10,26 @@
  * obtain it through the world-wide-web, please send an email
  * to license@skyverge.com so we can send you a copy immediately.
  *
- * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+namespace SkyVerge\WooCommerce\Dev_Helper;
+
 defined( 'ABSPATH' ) or exit;
 
+use SkyVerge\WooCommerce\PluginFramework\v5_2_0 as Framework;
+
 /**
- * Forwarded URLs Class
+ * Forwarded URLs handler.
  *
- * Note: You really should not use this plugin in production as it could
- * have unexpected results when filtering content URLs
+ * **Important!**
+ * You really should not use this plugin in production as it could have unexpected results when filtering content URLs.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
-class WC_Dev_Helper_Use_Forwarded_URLs {
+class Forwarded_URLs {
 
 
 	/** @var string non-forwarded host as defined in the siteurl option */
@@ -34,7 +37,7 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Setup filters
+	 * Adds hooks.
 	 *
 	 * @since 0.1.0
 	 */
@@ -109,9 +112,10 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Returns true if forwarding URLs
+	 * Returns true if forwarding URLs.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
+	 *
 	 * @return bool
 	 */
 	private function has_forwarded_host() {
@@ -121,9 +125,10 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Returns the forwarded host
+	 * Returns the forwarded host.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
+	 *
 	 * @return string
 	 */
 	public function get_forwarded_host() {
@@ -133,13 +138,15 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 
 
 	/**
-	 * Replace incoming content with non-forwarded URLs converted to
-	 * the forwarded URL
+	 * Replaces incoming content with non-forwarded URLs converted to the forwarded URL.
 	 *
-	 * Note this does not attempt to convert protocols, instead it relies on
-	 * WordPress handling protocol changes properly
+	 * **Note**
+	 * This does not attempt to convert protocols, instead it relies on WordPress handling protocol changes properly.
 	 *
-	 * @since 0.1.0
+	 * @internal
+	 *
+	 * @since 1.0.0
+	 *
 	 * @param mixed $content
 	 * @return mixed
 	 */

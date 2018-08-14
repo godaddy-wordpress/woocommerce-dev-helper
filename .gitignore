@@ -1,9 +1,15 @@
+# IDE
 /.idea
 *.zip
 .DS_Store
 
+# Composer
+/vendor
+composer.lock
+
 # NPM packages used by Grunt.js
 /node_modules
+package-lock.json
 
 # NPM debug log
 npm-debug.log

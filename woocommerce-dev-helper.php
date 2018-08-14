@@ -5,397 +5,317 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.8.0
+ * Version: 1.0.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2015-2017 SkyVerge [info@skyverge.com]
+ * Copyright: (c) 2015-2018 SkyVerge [info@skyverge.com]
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
- * @package   WooCommerce-Dev-Helper
  * @author    SkyVerge
- * @category  Development
  * @copyright Copyright (c) 2012-2017, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
 defined( 'ABSPATH' ) or exit;
 
-class WC_Dev_Helper {
+/**
+ * WooCommerce Dev Helper loader.
+ *
+ * Loads the helper plugin within the SkyVerge Plugin Framework.
+ *
+ * Even though it's called "WooCommerce" Dev Helper this plugin can offer some of its features in general WordPress or eCommerce development.
+ * It is therefore necessary to add some additional conditional checks to see if WooCommerce is loaded before calling WooCommerce-specific methods and functions.
+ *
+ * @since 1.0.0
+ */
+class WC_Dev_Helper_Loader {
 
 
-	/** @var \WC_Dev_Helper instance */
+	/** minimum PHP version required by this plugin */
+	const MINIMUM_PHP_VERSION = '5.3.0';
+
+	/** minimum WordPress version required by this plugin */
+	const MINIMUM_WP_VERSION = '4.4';
+
+	/** minimum WooCommerce version required by this plugin */
+	const MINIMUM_WC_VERSION = '2.6.14';
+
+	/** the plugin name, for displaying notices */
+	const PLUGIN_NAME = 'WooCommerce Dev Helper';
+
+	/** plugin namespace */
+	const PLUGIN_NAMESPACE = 'SkyVerge\WooCommerce\Dev_Helper';
+
+
+	/** @var \WC_Dev_Helper_Loader single instance of this plugin */
 	protected static $instance;
 
-	/** @var \WC_Dev_Helper_Ajax instance */
-	protected $ajax;
+	/** @var array the admin notices to add */
+	private $notices = array();
 
-	/** @var \WC_Dev_Helper_Use_Forwarded_URLs instance */
-	protected $use_forwarded_urls;
-
-	/** @var \WC_Dev_Helper_Subscriptions instance */
-	protected $subscriptions;
-
-	/** @var \WC_Dev_Helper_Memberships instance */
-	protected $memberships;
-
-	/** @var \WC_Bogus_Gateway instance */
-	protected $gateway;
 
 
 	/**
-	 * Bootstrap class
+	 * Initializes the loader.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
-	public function __construct() {
+	protected function __construct() {
 
-		// global functions
-		require_once( $this->get_plugin_path() . '/includes/wc-dev-helper-functions.php' );
+		register_activation_hook( __FILE__, array( $this, 'activation_check' ) );
 
-		// remove woo updater notice
-		add_action( 'admin_init', array( $this, 'muzzle_woo_updater' ) );
+		add_action( 'admin_init', array( $this, 'check_environment' ) );
+		add_action( 'admin_init', array( $this, 'add_plugin_notices' ) );
 
-		// class includes
-		add_action( 'plugins_loaded', array( $this, 'includes' ) );
+		add_action( 'admin_notices', array( $this, 'admin_notices' ), 15 );
 
-		// maybe log actions/filters
-		add_action( 'shutdown', array( $this, 'maybe_log_hooks' ) );
-
-		// remove WC strong password script
-		add_action( 'wp_print_scripts', array( $this, 'remove_wc_password_meter' ), 100 );
-
-		// add some inline JS
-		add_action( 'wp_footer', array( $this, 'enqueue_scripts' ) );
-
-		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
-			add_action( 'wp_head',   array( $this, 'bogus_gateway_styles' ) );
+		// if the environment checks pass, initialize the plugin
+		if ( $this->is_environment_compatible() ) {
+			add_action( 'plugins_loaded', array( $this, 'init_plugin' ) );
 		}
-
-		// add the testing gateway
-		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
-
-		// filter default Elavon test card
-		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
-
-		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
-		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
-	}
-
-
-	/**
-	 * Removes the "Please install Woo Updater" notice when an official WC extension
-	 * is active but the Woo Updater plugin is not.
-	 *
-	 * Also removes the WC 3.3+ "Connect to WooCommerce.com" notice.
-	 *
-	 * @since 0.1.0
-	 */
-	public function muzzle_woo_updater() {
-		remove_action( 'admin_notices', 'woothemes_updater_notice' );
-		add_filter( 'woocommerce_helper_suppress_admin_notices', '__return_true' );
-	}
-
-
-	/**
-	 * Removes the strong password meter / requirement from WC 2.5+
-	 * because these are dev shop passwords, not vodka drinks -- we like them weak
-	 *
-	 * @since 0.3.0
-	 */
-	public function remove_wc_password_meter() {
-		wp_dequeue_script( 'wc-password-strength-meter' );
-	}
-
-
-	/**
-	 * Add inline JavaScript.
-	 *
-	 * @since 0.5.0
-	 */
-	public function enqueue_scripts() {
-
-		?>
-		<script type="text/javascript">
-				function wc_dev_get_session() {
-					jQuery.post( '<?php echo admin_url( 'admin-ajax.php' ); ?>', { action: 'wc_dev_helper_get_session' }, function( response ) {
-						console.log( response );
-					});
-				}
-		</script>
-		<?php
-	}
-
-
-	/**
-	 * Add the bogus gateway to WC available gateways.
-	 *
-	 * @since 0.6.0
-	 * @param array $gateways all available WC gateways
-	 * @return array updated gateways
-	 */
-	public function add_bogus_gateway( $gateways ) {
-		$gateways[] = 'WC_Bogus_Gateway';
-		return $gateways;
-	}
-
-
-	/**
-	 * Changes the Elavon default payment form values.
-	 *
-	 * @since 0.8.0
-	 *
-	 * @param string[]  $defaults the gateway form defaults
-	 * @param \WC_Gateway_Elavon_Converge_Credit_Card $gateway gateway instance
-	 * @return string[] update default values
-	 */
-	public function change_elavon_test_values( $defaults, $gateway ) {
-
-		if ( $gateway->is_test_environment() ) {
-			$defaults['expiry']         = '12/19';
-			$defaults['account-number'] = '4124939999999990';
-		}
-
-		return $defaults;
-	}
-
-
-	/**
-	 * Include required files
-	 *
-	 * @since 0.1.0
-	 */
-	public function includes() {
-
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-ajax.php' );
-		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
-			$this->ajax    = new WC_Dev_Helper_Ajax();
-		}
-
-		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
-			$this->gateway = new WC_Bogus_Gateway();
-		}
-
-		if ( $this->is_plugin_active( 'woocommerce-subscriptions.php' ) ) {
-
-			// Subscriptions helper
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-subscriptions.php' );
-			$this->subscriptions = new WC_Dev_Helper_Subscriptions();
-		}
-
-		if ( $this->is_plugin_active( 'woocommerce-memberships.php' ) ) {
-
-			// Memberships helper
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-memberships.php' );
-			$this->memberships = new WC_Dev_Helper_Memberships();
-		}
-	}
-
-
-	/**
-	 * A simple way to log the actions/filers fired, simply add this query string:
-	 *
-	 * ?wcdh_hooks=actions|filters|all
-	 *
-	 * And the desired hook names will be saved to the error log along with a fired count
-	 *
-	 * If you want more advanced hook logging, use https://wordpress.org/plugins/debug-bar-actions-and-filters-addon/
-	 *
-	 * @since 0.1.0
-	 */
-	public function maybe_log_hooks() {
-
-		$hooks = array();
-
-		if ( empty( $_GET['wcdh_hooks'] ) ) {
-			return;
-		}
-
-		switch( $_GET['wcdh_hooks'] ) {
-
-			case 'actions':
-				$hooks = $GLOBALS['wp_actions'];
-			break;
-
-			case 'filters':
-				$hooks = $GLOBALS['wp_filter'];
-			break;
-
-			case 'all':
-				$hooks = array_merge( $GLOBALS['wp_actions'], $GLOBALS['wp_filter'] );
-			break;
-		}
-
-		foreach ( $hooks as $hook => $count ) {
-			error_log( sprintf( '%s (%d)' . PHP_EOL, $hook, $count ) );
-		}
-	}
-
-
-	/**
-	 * Return the plugin path
-	 *
-	 * @since 0.1.0
-	 * @return string
-	 */
-	public function get_plugin_path() {
-
-		return untrailingslashit( plugin_dir_path( __FILE__ ) );
-	}
-
-
-	/**
-	 * Helper function to determine whether a plugin is active
-	 *
-	 * @since 0.4.0
-	 * @param string $plugin_name plugin name, as the plugin-filename.php
-	 * @return bool
-	 */
-	public function is_plugin_active( $plugin_name ) {
-
-		$active_plugins = (array) get_option( 'active_plugins', array() );
-
-		if ( is_multisite() ) {
-			$active_plugins = array_merge( $active_plugins, get_site_option( 'active_sitewide_plugins', array() ) );
-		}
-
-		$plugin_filenames = array();
-
-		foreach ( $active_plugins as $plugin ) {
-
-			if ( strpos( $plugin, '/' ) ) {
-				// normal plugin name (plugin-dir/plugin-filename.php)
-				list( , $filename ) = explode( '/', $plugin );
-			} else {
-				// no directory, just plugin file
-				$filename = $plugin;
-			}
-
-			$plugin_filenames[] = $filename;
-		}
-
-		return in_array( $plugin_name, $plugin_filenames, true );
-	}
-
-
-	/**
-	 * Adjust Bogus Gateway styles
-	 *
-	 * @since 0.6.0
-	 */
-	public function bogus_gateway_styles() {
-
-		if ( is_checkout() || is_checkout_pay_page() ) {
-			echo '<style type="text/css">
-			#payment .payment_methods li.payment_method_bogus_gateway img {
-				float: none !important;
-			}
-			</style>';
-		}
-	}
-
-
-	/** Instance Getters ******************************************************/
-
-
-	/**
-	 * Return the Use_Forwarded_URLs class instance
-	 *
-	 * @since 0.1.0
-	 * @return \WC_Dev_Helper_Use_Forwarded_URLs
-	 */
-	public function use_forwarded_urls() {
-		return $this->use_forwarded_urls;
-	}
-
-
-	/**
-	 * Return the Subscriptions class instance
-	 *
-	 * @since 0.1.0
-	 * @return \WC_Dev_Helper_Subscriptions
-	 */
-	public function subscriptions() {
-		return $this->subscriptions;
-	}
-
-
-	/**
-	 * Return the Memberships class instance
-	 *
-	 * @since 0.4.0
-	 * @return \WC_Dev_Helper_Memberships
-	 */
-	public function memberships() {
-		return $this->memberships;
-	}
-
-
-	/**
-	 * Return the gateway class instance
-	 *
-	 * @since 0.6.0
-	 * @return \WC_Bogus_Gateway
-	 */
-	public function gateway() {
-		return $this->gateway();
-	}
-
-
-	/** Housekeeping **********************************************************/
-
-
-	/**
-	 * Main WC Dev Helper Instance, ensures only one instance is/can be loaded
-	 *
-	 * @since 0.1.0
-	 * @see wc_dev_helper()
-	 * @return \WC_Dev_Helper
-	 */
-	public static function instance() {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
 	}
 
 
 	/**
 	 * Cloning instances is forbidden due to singleton pattern.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
 	public function __clone() {
-		_doing_it_wrong( __FUNCTION__, __( 'You cannot clone instances of WooCommerce Dev Helper.', 'woocommerce-dev-helper' ), '0.1.0' );
+
+		_doing_it_wrong( __FUNCTION__, sprintf( 'You cannot clone instances of %s.', get_class( $this ) ), '1.0.0' );
 	}
 
 
 	/**
 	 * Unserializing instances is forbidden due to singleton pattern.
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
 	public function __wakeup() {
-		_doing_it_wrong( __FUNCTION__, __( 'You cannot unserialize instances of WooCommerce Dev Helper.', 'woocommerce-dev-helper' ), '0.1.0' );
+
+		_doing_it_wrong( __FUNCTION__, sprintf( 'You cannot unserialize instances of %s.', get_class( $this ) ), '1.0.0' );
+	}
+
+
+	/**
+	 * Initializes the plugin.
+	 *
+	 * @since 1.0.0
+	 */
+	public function init_plugin() {
+
+		if ( ! $this->is_wp_compatible() ) {
+			return;
+		}
+
+		// load the framework
+		$this->load_framework();
+
+		// autoload plugin and vendor files
+		$loader = require_once( plugin_dir_path( __FILE__ ) . 'vendor/autoload.php' );
+
+		// register plugin namespace with autoloader
+		$loader->addPsr4( self::PLUGIN_NAMESPACE . '\\', __DIR__ . '/src' );
+
+		// include the mail plugin class file
+		require_once( plugin_dir_path( __FILE__ ) . 'src/Plugin.php' );
+
+		require_once( plugin_dir_path( __FILE__ ) . 'src/Functions.php' );
+
+		wc_dev_helper();
+	}
+
+
+	/**
+	 * Loads the base framework classes.
+	 *
+	 * @since 1.0.0
+	 */
+	protected function load_framework() {
+
+		if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_2_0\\SV_WC_Plugin' ) ) {
+
+			require_once( plugin_dir_path( __FILE__ ) . 'vendor/skyverge/wc-plugin-framework/woocommerce/class-sv-wc-plugin.php' );
+		}
+	}
+
+
+	/**
+	 * Checks the server environment and other factors and deactivates plugins as necessary.
+	 *
+	 * Based on http://wptavern.com/how-to-prevent-wordpress-plugins-from-activating-on-sites-with-incompatible-hosting-environments
+	 *
+	 * @since 1.0.0
+	 */
+	public function activation_check() {
+
+		if ( ! $this->is_environment_compatible() ) {
+
+			$this->deactivate_plugin();
+
+			wp_die( self::PLUGIN_NAME . ' could not be activated. ' . $this->get_environment_message() );
+		}
+	}
+
+
+	/**
+	 * Checks the environment on loading WordPress, just in case the environment changes after activation.
+	 *
+	 * @since 1.0.0
+	 */
+	public function check_environment() {
+
+		if ( ! $this->is_environment_compatible() && is_plugin_active( plugin_basename( __FILE__ ) ) ) {
+
+			$this->deactivate_plugin();
+
+			$this->add_admin_notice( 'bad_environment', 'error', self::PLUGIN_NAME . ' has been deactivated. ' . $this->get_environment_message() );
+		}
+	}
+
+
+	/**
+	 * Adds notices for out-of-date WordPress and/or WooCommerce versions.
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_plugin_notices() {
+
+		if ( ! $this->is_wp_compatible() ) {
+
+			$this->add_admin_notice( 'update_wordpress', 'error', sprintf(
+				'%s requires WordPress version %s or higher. Please %supdate WordPress &raquo;%s',
+				'<strong>' . self::PLUGIN_NAME . '</strong>',
+				self::MINIMUM_WP_VERSION,
+				'<a href="' . esc_url( admin_url( 'update-core.php' ) ) . '">', '</a>'
+			) );
+		}
+	}
+
+
+	/**
+	 * Determines if the WordPress compatible.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	protected function is_wp_compatible() {
+
+		return version_compare( get_bloginfo( 'version' ), self::MINIMUM_WP_VERSION, '>=' );
+	}
+
+
+	/**
+	 * Determines if the server environment is compatible with this plugin.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	protected function is_environment_compatible() {
+
+		return version_compare( PHP_VERSION, self::MINIMUM_PHP_VERSION, '>=' );
+	}
+
+
+	/**
+	 * Gets the message for display when the environment is incompatible with this plugin.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	protected function get_environment_message() {
+
+		return sprintf( 'The minimum PHP version required for this plugin is %1$s. You are running %2$s.', self::MINIMUM_PHP_VERSION, PHP_VERSION );
+	}
+
+
+	/**
+	 * Deactivates the plugin.
+	 *
+	 * @since 1.0.0
+	 */
+	protected function deactivate_plugin() {
+
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+
+		if ( isset( $_GET['activate'] ) ) {
+			unset( $_GET['activate'] );
+		}
+	}
+
+
+	/**
+	 * Adds an admin notice to be displayed.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $slug the notice slug
+	 * @param string $class the notice class
+	 * @param string $message the notice message
+	 */
+	public function add_admin_notice( $slug, $class, $message ) {
+
+		$this->notices[ $slug ] = array(
+			'class'   => $class,
+			'message' => $message
+		);
+	}
+
+
+	/**
+	 * Displays admin notices.
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_notices() {
+
+		foreach ( $this->notices as $notice_key => $notice ) :
+
+			?>
+			<div class="<?php echo esc_attr( $notice['class'] ); ?>">
+				<p><?php echo wp_kses( $notice['message'], array( 'a' => array( 'href' => array() ) ) ); ?></p>
+			</div>
+			<?php
+
+		endforeach;
+	}
+
+
+	/**
+	 * Returns the loader instance.
+	 *
+	 * Ensures only one instance is loaded at one time.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return \WC_Dev_Helper_Loader
+	 */
+	public static function instance() {
+
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
 	}
 
 
 }
 
 
-/**
- * Returns the One True Instance of WC Dev Helper
- *
- * @since 0.1.0
- * @return \WC_Dev_Helper instance
- */
-function wc_dev_helper() {
-	return WC_Dev_Helper::instance();
+// reintroduces a WooCommerce core function to ensure compatibility if WooCommerce isn't active
+if ( ! function_exists( 'is_ajax' )  ) {
+	function is_ajax() {
+		return defined( 'DOING_AJAX' );
+	}
 }
 
 // fire it up!
-wc_dev_helper();
+WC_Dev_Helper_Loader::instance();

@@ -9,7 +9,7 @@ Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` for 
 
 We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your WordPress root.
 
-### Subscriptions (v1.5.x and v2.x.x)
+### Subscriptions
 
 Adds a "renew" link to each subscription under WooCommerce > Subscriptions for easy renewal processing. This is particularly useful for testing
 payment gateways that supports subscriptions.
@@ -43,6 +43,10 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 Download and install just like any other WordPress plugin. If you want to be really fancy, symlink it into your installs instead.
 
 ## Changelog
+
+### 1.0.0 - 2018.08.15
+ * Misc - Dropped support for PHP 5.2 - PHP 5.3 is the minimum required version
+ * Misc - Uses the SkyVerge Plugin Framework 
 
 ### 0.8.1 - 2017.12.13
  * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active

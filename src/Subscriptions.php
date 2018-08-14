@@ -10,49 +10,46 @@
  * obtain it through the world-wide-web, please send an email
  * to license@skyverge.com so we can send you a copy immediately.
  *
- * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+namespace SkyVerge\WooCommerce\Dev_Helper;
+
 defined( 'ABSPATH' ) or exit;
 
+use SkyVerge\WooCommerce\PluginFramework\v5_2_0 as Framework;
+
 /**
- * Subscriptions Class
+ * Subscriptions helper.
  *
- * This provides some helpers for developing extensions (like payment gateways)
- * that integrate with the WooCommerce Subscriptions extension
+ * This provides some helpers for developing extensions (like payment gateways),
+ * that integrate with the WooCommerce Subscriptions extension.
  *
- * @since 0.1.0
+ * @since 1.0.0
  */
-class WC_Dev_Helper_Subscriptions {
+class Subscriptions {
 
 
 	/**
-	 * Setup an easy-to-use action for triggering subscription renewals, useful for gateway testing
+	 * Adds hooks.
 	 *
-	 * @since 0.1.0
+	 * Sets up an easy-to-use action for triggering subscription renewals, useful for gateway testing.
+	 *
+	 * @since 1.0.0
 	 */
 	public function __construct() {
 
-		// without this, and when using forwarded URLs, WC Subscriptions believes the site to be "duplicate" and disables updating the payment method
+		// without this, and when using Forwarded URLs, Subscriptions believes the site to be "duplicate" and disables updating the payment method
 		add_filter( 'woocommerce_subscriptions_is_duplicate_site', '__return_false' );
 
 		// add the renew action to the Subscriptions list table
-		if ( $this->is_subs_gte_2_0() ) {
-			add_filter( 'woocommerce_subscription_list_table_actions', array( $this, 'add_renew_action' ), 10, 2 );
-		} else {
-			add_filter( 'woocommerce_subscriptions_list_table_actions', array( $this, 'add_renew_action' ), 10, 2 );
-		}
+		add_filter( 'woocommerce_subscription_list_table_actions', array( $this, 'add_renew_action' ), 10, 2 );
 
 		// process the renewal action
-		if ( $this->is_subs_gte_2_0() ) {
-			add_action( 'load-edit.php', array( $this, 'process_renew_action' ) );
-			add_action( 'admin_notices', array( $this, 'maybe_render_renewal_success_message' ) );
-		} else {
-			add_action( 'load-woocommerce_page_subscriptions', array( $this, 'process_pre_subs_2_0_renew_action' ) );
-		}
+		add_action( 'load-edit.php', array( $this, 'process_renew_action' ) );
+		add_action( 'admin_notices', array( $this, 'maybe_render_renewal_success_message' ) );
 
 		// add support for minutes and hours-long Subscription period for quicker testing
 		add_filter( 'woocommerce_subscription_available_time_periods', array( $this, 'new_subscription_periods' ) );
@@ -72,30 +69,13 @@ class WC_Dev_Helper_Subscriptions {
 	 */
 	public function add_renew_action( $actions, $subscription ) {
 
-		if ( $this->is_subs_gte_2_0() ) {
-
-			$renew_url = add_query_arg(
-				array(
-					'post'     => is_callable( array( $subscription, 'get_id' ) ) ? $subscription->get_id() : $subscription->id,
-					'action'   => 'renew',
-					'_wpnonce' => wp_create_nonce( 'bulk-posts' ),
-				)
-			);
-
-		} else {
-
-			$renew_url = add_query_arg(
-				array(
-					'page'         => $_REQUEST['page'],
-					'user'         => $subscription['user_id'],
-					'subscription' => $subscription['subscription_key'],
-					'action'       => 'renew',
-					'_wpnonce'     => wp_create_nonce( $subscription['subscription_key'] ),
-				)
-			);
-		}
-
-		$actions['renew'] = sprintf( '<a href="%s">%s</a>', esc_url( $renew_url ), __( 'Renew', 'woocommerce-dev-helper' ) );
+		$actions['renew'] = sprintf( '<a href="%s">%s</a>', esc_url( add_query_arg(
+			array(
+				'post'     => Framework\SV_WC_Order_Compatibility::get_prop( $subscription, 'id' ),
+				'action'   => 'renew',
+				'_wpnonce' => wp_create_nonce( 'bulk-posts' ),
+			)
+		) ), __( 'Renew', 'woocommerce-dev-helper' ) );
 
 		return $actions;
 	}
