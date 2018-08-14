@@ -15,7 +15,7 @@
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
  * @author    SkyVerge
- * @copyright Copyright (c) 2012-2017, SkyVerge
+ * @copyright Copyright (c) 2012-2018, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
