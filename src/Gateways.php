@@ -23,7 +23,7 @@ use SkyVerge\WooCommerce\Dev_Helper\Gateways\Bogus;
 use SkyVerge\WooCommerce\PluginFramework\v5_2_0 as Framework;
 
 /**
- * Tweaks known gateways and implements a mock gateway for testing purposes.
+ * Tweaks known WooCommerce gateways and implements a mock gateway for testing purposes.
  *
  * @since 1.0.0
  */
@@ -41,7 +41,7 @@ class Gateways {
 	 */
 	public function __construct() {
 
-		if ( wc_dev_helper()->is_plugin_active( 'woocommerce.php' ) ) {
+		if ( wc_dev_helper()->is_woocommerce_active() ) {
 
 			$this->add_bogus_gateway();
 

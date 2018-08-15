@@ -36,6 +36,7 @@ class AJAX {
 	 */
 	public function __construct() {
 
+		// send WooCommerce session data to console JS request
 		add_action( 'wp_ajax_wc_dev_helper_get_session',        array( $this, 'get_session_data' ) );
 		add_action( 'wp_ajax_nopriv_wc_dev_helper_get_session', array( $this, 'get_session_data' ) );
 	}

@@ -24,7 +24,7 @@ use SkyVerge\WooCommerce\PluginFramework\v5_2_0 as Framework;
 /**
  * Memberships helper.
  *
- * This provides some helpers for development work on WooCommerce Memberships
+ * This provides some helpers for development work on WooCommerce Memberships.
  *
  * @since 1.0.0
  */

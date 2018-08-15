@@ -36,20 +36,32 @@ class Plugin extends Framework\SV_WC_Plugin {
 	const PLUGIN_ID = 'woocommerce-dev-helper';
 
 
+	/** @var null|bool flags whether WooCommerce core is active */
+	private $woocommerce_active;
+
+	/** @var Scripts handler instance */
+	private $scripts;
+
 	/** @var AJAX handler instance */
-	protected $ajax;
-
-	/** @var Forwarded_URLs instance */
-	protected $forwarded_urls;
-
-	/** @var Subscriptions helper instance */
-	protected $subscriptions;
-
-	/** @var Memberships helper instance */
-	protected $memberships;
+	private $ajax;
 
 	/** @var Gateways helper instance */
 	private $gateways;
+
+	/** @var Forwarded_URLs instance */
+	private $forwarded_urls;
+
+	/** @var Subscriptions helper instance */
+	private $subscriptions;
+
+	/** @var null|bool flags whether WooCommerce Subscriptions is active */
+	private $subscriptions_active;
+
+	/** @var Memberships helper instance */
+	private $memberships;
+
+	/** @var null|bool flags whether WooCommerce Memberships is active */
+	private $memberships_active;
 
 
 	/**
@@ -80,7 +92,7 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 		} );
 
-		// removes the Woo Updater notice when deactivated
+		// removes the Woo Updater notice when the updater is deactivated
 		add_action( 'admin_init', function() {
 
 			remove_action( 'admin_notices', 'woothemes_updater_notice' );
@@ -118,14 +130,40 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 
 	/**
+	 * Returns the plugin URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public function get_plugin_url() {
+
+		return \WC_Dev_Helper_Loader::get_plugin_url();
+	}
+
+
+	/**
+	 * Initializes the plugin.
+	 *
+	 * @since 1.0.0
+	 */
+	public function init_plugin() {
+
+		$this->includes();
+	}
+
+
+	/**
 	 * Include required files
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
-	public function includes() {
+	private function includes() {
+
+		$this->scripts = new Scripts();
 
 		// AJAX handler
-		if ( defined( 'DOING_AJAX' ) ) {
+		if ( is_ajax() ) {
 			$this->ajax = new AJAX();
 		}
 
@@ -133,14 +171,94 @@ class Plugin extends Framework\SV_WC_Plugin {
 		$this->gateways = new Gateways();
 
 		// Subscriptions helper
-		if ( $this->is_plugin_active( 'woocommerce-subscriptions.php' ) ) {
+		if ( $this->is_subscriptions_active() ) {
 			$this->subscriptions = new Subscriptions();
 		}
 
 		// Memberships helper
-		if ( $this->is_plugin_active( 'woocommerce-memberships.php' ) ) {
+		if ( $this->is_woocommerce_active() ) {
 			$this->memberships = new Memberships();
 		}
+	}
+
+
+	/**
+	 * Determines whether WooCommerce is installed and active.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_woocommerce_active() {
+
+		if ( null === $this->woocommerce_active ) {
+
+			$this->woocommerce_active = $this->is_plugin_active( 'woocommerce.php' );
+		}
+
+		return $this->woocommerce_active;
+	}
+
+
+	/**
+	 * Determines whether WooCommerce Subscriptions is installed and active.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_subscriptions_active() {
+
+		if ( null === $this->subscriptions_active && $this->is_woocommerce_active() ) {
+
+			$this->subscriptions_active = $this->is_plugin_active( 'woocommerce-subscriptions.php' );
+		}
+
+		return (bool) $this->subscriptions_active;
+	}
+
+
+	/**
+	 * Determines whether WooCommerce Memberships is installed and active.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function is_memberships_active() {
+
+		if ( null === $this->memberships_active && $this->is_woocommerce_active() ) {
+
+			$this->memberships_active = $this->is_plugin_active( 'woocommerce-memberships.php' );
+		}
+
+		return (bool) $this->memberships_active;
+	}
+
+
+	/**
+	 * Returns the scripts handler instance.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Scripts instance
+	 */
+	public function get_scripts_instance() {
+
+		return $this->scripts;
+	}
+
+
+	/**
+	 * Returns the AJAX handler instance.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return AJAX instance
+	 */
+	public function get_ajax_instance() {
+
+		return $this->ajax;
 	}
 
 
@@ -226,6 +344,8 @@ class Plugin extends Framework\SV_WC_Plugin {
 	 * If you want more advanced hook logging, use:
 	 * @link https://wordpress.org/plugins/debug-bar-actions-and-filters-addon/
 	 *
+	 * @internal
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param string $key
@@ -284,7 +404,7 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 		foreach ( $d as $i => $r ) {
 
-			if ( ! $show_first && $i == 0 ) {
+			if ( ! $show_first && (int) $i === 0 ) {
 				continue;
 			}
 
@@ -309,6 +429,9 @@ class Plugin extends Framework\SV_WC_Plugin {
 	 * @see print_r()
 	 * @see var_dump()
 	 *
+	 * For alternative logging in browser console, consider:
+	 * @link https://wordpress.org/plugins/wp-php-console/
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param mixed $var variable to log
@@ -330,6 +453,9 @@ class Plugin extends Framework\SV_WC_Plugin {
 	 * Allows to return the output, rather than printing.  Useful for logging.
 	 *
 	 * @see var_dump()
+	 *
+	 * For alternative logging in browser console, consider:
+	 * @link https://wordpress.org/plugins/wp-php-console/
 	 *
 	 * @since 1.0.0
 	 *
@@ -370,6 +496,9 @@ class Plugin extends Framework\SV_WC_Plugin {
 	 * Prints human-readable information about a variable wrapping it in pre-formatted HTML tags.
 	 *
 	 * @see print_r()
+	 *
+	 * For alternative logging in browser console, consider:
+	 * @link https://wordpress.org/plugins/wp-php-console/
 	 *
 	 * @since 1.0.0
 	 *

@@ -43,6 +43,9 @@ class WC_Dev_Helper_Loader {
 	/** minimum WooCommerce version required by this plugin */
 	const MINIMUM_WC_VERSION = '2.6.14';
 
+	/** SkyVerge plugin framework version used by this plugin */
+	const FRAMEWORK_VERSION = '5.2.0';
+
 	/** the plugin name, for displaying notices */
 	const PLUGIN_NAME = 'WooCommerce Dev Helper';
 
@@ -51,11 +54,13 @@ class WC_Dev_Helper_Loader {
 
 
 	/** @var \WC_Dev_Helper_Loader single instance of this plugin */
-	protected static $instance;
+	private static $instance;
+
+	/** @var string the plugin's URL */
+	private static $plugin_url = '';
 
 	/** @var array the admin notices to add */
 	private $notices = array();
-
 
 
 	/**
@@ -129,6 +134,31 @@ class WC_Dev_Helper_Loader {
 		wc_dev_helper();
 	}
 
+	/**
+	 * Returns the framework version used by this plugin.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	protected function get_framework_version() {
+
+		return self::FRAMEWORK_VERSION;
+	}
+
+
+	/**
+	 * Returns the framework version in namespace form.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	protected function get_framework_version_namespace() {
+
+		return 'v' . str_replace( '.', '_', $this->get_framework_version() );
+	}
+
 
 	/**
 	 * Loads the base framework classes.
@@ -137,9 +167,16 @@ class WC_Dev_Helper_Loader {
 	 */
 	protected function load_framework() {
 
-		if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\v5_2_0\\SV_WC_Plugin' ) ) {
-
+		if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\' . $this->get_framework_version_namespace() . '\\SV_WC_Plugin' ) ) {
 			require_once( plugin_dir_path( __FILE__ ) . 'vendor/skyverge/wc-plugin-framework/woocommerce/class-sv-wc-plugin.php' );
+		}
+
+		if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\' . $this->get_framework_version_namespace() . '\\SV_WP_Async_Request' ) ) {
+			require_once( plugin_dir_path( __FILE__ ) . 'vendor/skyverge/wc-plugin-framework/woocommerce/utilities/class-sv-wp-async-request.php' );
+		}
+
+		if ( ! class_exists( '\\SkyVerge\\WooCommerce\\PluginFramework\\' . $this->get_framework_version_namespace() . '\\SV_WP_Background_Job_Handler' ) ) {
+			require_once( plugin_dir_path( __FILE__ ) . 'vendor/skyverge/wc-plugin-framework/woocommerce/utilities/class-sv-wp-background-job-handler.php' );
 		}
 	}
 
@@ -285,6 +322,23 @@ class WC_Dev_Helper_Loader {
 			<?php
 
 		endforeach;
+	}
+
+
+	/**
+	 * Returns the plugin root URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string
+	 */
+	public static function get_plugin_url() {
+
+		if ( empty( self::$plugin_url ) ) {
+			self::$plugin_url = untrailingslashit( plugins_url( '/', __FILE__ ) );
+		}
+
+		return self::$plugin_url;
 	}
 
 
