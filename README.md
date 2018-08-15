@@ -34,7 +34,7 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 
 ### Misc
 
-* Removes the WooCommmerce Updater notice
+* Removes the WooCommerce Updater notice
 * Removes the strong password requirement for customer accounts
 * Helper for logging actions/filters fired during a page load -- simply add `?wcdh_hooks=actions|filters|all`, reload the page, and your desired hooks will be printed to the error log, along with the fired count
 
@@ -45,6 +45,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 ## Changelog
 
 ### 1.0.0 - 2018.08.15
+ * Feature - Add a bulk generator tool to create WooCommerce Memberships objects on demand for performance testing  
  * Misc - Dropped support for PHP 5.2 - PHP 5.3 is the minimum required version
  * Misc - Uses the SkyVerge Plugin Framework 
 

@@ -1,112 +1,177 @@
-# Copyright (C) 2017 SkyVerge
+# Copyright (C) 2018 SkyVerge
 # This file is distributed under the GNU General Public License v3.0.
 msgid ""
 msgstr ""
-"Project-Id-Version: A WooCommerce Dev Helper 0.8.0\n"
+"Project-Id-Version: A WooCommerce Dev Helper 1.0.0\n"
 "Report-Msgid-Bugs-To: "
-"https://github.com/skyverge/woocommerce-dev-helper/issues\n"
-"POT-Creation-Date: 2015-07-26 19:51:27+00:00\n"
+"https://woocommerce.com/my-account/marketplace-ticket-form/\n"
+"POT-Creation-Date: 2018-08-15 05:35:32+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2017-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:42
+#: src/Gateways/Bogus.php:51
 msgid "Bogus"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:43
+#: src/Gateways/Bogus.php:52
 msgid ""
 "A testing gateway that calls \"payment complete\" to simulate credit card "
 "transactions."
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:92
+#: src/Gateways/Bogus.php:101
 msgid "Enable/Disable"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:94
+#: src/Gateways/Bogus.php:103
 msgid "Enable Bogus Gateway"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:99
+#: src/Gateways/Bogus.php:108
 msgid "Title"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:101
+#: src/Gateways/Bogus.php:110
 msgid ""
 "This controls the title for the payment method the customer sees during "
 "checkout."
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:102
+#: src/Gateways/Bogus.php:111
 msgid "Bogus (Test)"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:107
+#: src/Gateways/Bogus.php:116
 msgid "Description"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:109
+#: src/Gateways/Bogus.php:118
 msgid "Payment method description that the customer will see on your checkout."
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:110
+#: src/Gateways/Bogus.php:119
 msgid "Nothingtodohere &#128640;"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:115
+#: src/Gateways/Bogus.php:124
 msgid "Enable Subscriptions support?"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:117
+#: src/Gateways/Bogus.php:126
 msgid "Makes the gateway available for subscriptions purchases"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:150
+#: src/Gateways/Bogus.php:162
 msgid "Bogus is always approved &#128526;"
 msgstr ""
 
-#: includes/class-wc-dev-helper-bogus-gateway.php:175
+#: src/Gateways/Bogus.php:189
 msgid "Renewal order processed. Bogus is always approved &#128526;"
 msgstr ""
 
-#: includes/class-wc-dev-helper-memberships.php:55
+#: src/Memberships.php:62
 msgid "minute(s)"
 msgstr ""
 
-#: includes/class-wc-dev-helper-memberships.php:56
+#: src/Memberships.php:63
 msgid "hour(s)"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:98
-msgid "Renew"
+#: src/Memberships.php:113 src/Memberships.php:166 src/Memberships.php:167
+msgid "Bulk Generation"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:151
-msgid "Subscription renewal processed. %sView Renewal Order%s"
+#: src/Memberships.php:134
+msgid "Memberships Bulk Generation"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:174
-msgid "Action Failed, Invalid Nonce"
+#: src/Memberships.php:178
+msgid "Generate Memberships"
 msgstr ""
 
-#: includes/class-wc-dev-helper-subscriptions.php:203
-msgid "Subscription Renewal Processed"
+#: src/Memberships.php:179
+msgid "Destroy Memberships"
 msgstr ""
 
-#: woocommerce-dev-helper.php:373
-msgid "You cannot clone instances of WooCommerce Dev Helper."
+#: src/Memberships.php:186
+msgid "Generate User Memberships in Bulk"
 msgstr ""
 
-#: woocommerce-dev-helper.php:383
-msgid "You cannot unserialize instances of WooCommerce Dev Helper."
+#: src/Memberships.php:188
+msgid ""
+"Create up to thousands of users, posts, products, categories, membership "
+"plans and user memberships in bulk."
+msgstr ""
+
+#: src/Memberships.php:189
+msgid ""
+"This tool is intended for testing, development and demonstration purposes "
+"only. Memberships objects thus created can be later removed %1$susing the "
+"counterpart tool%2$s."
+msgstr ""
+
+#: src/Memberships.php:190 src/Memberships.php:250
+msgid "It is not advised to use this tool on a production site."
+msgstr ""
+
+#: src/Memberships.php:196
+msgid "Number of Memberships"
+msgstr ""
+
+#: src/Memberships.php:227
+msgid "Enter the total number of memberships to generate in bulk."
+msgstr ""
+
+#: src/Memberships.php:233 src/Memberships.php:256
+msgid "Once launched, the operation cannot be stopped."
+msgstr ""
+
+#: src/Memberships.php:238
+msgid "Generate"
+msgstr ""
+
+#: src/Memberships.php:246
+msgid "Destroy Memberships Created in Bulk"
+msgstr ""
+
+#: src/Memberships.php:248
+msgid ""
+"This tool will permanently remove user memberships, membership plans, "
+"posts, products and users previously created with the bulk generation tool."
+msgstr ""
+
+#: src/Memberships.php:249
+msgid ""
+"Membership objects, users and other WordPress content created otherwise "
+"will not be affected."
+msgstr ""
+
+#: src/Memberships.php:261
+msgid "Destroy"
 msgstr ""
 
 #. Plugin Name of the plugin/theme
 msgid "A WooCommerce Dev Helper"
+msgstr ""
+
+#: src/Subscriptions.php:78
+msgid "Renew"
+msgstr ""
+
+#: src/Subscriptions.php:131
+msgid "Subscription renewal processed. %sView Renewal Order%s"
+msgstr ""
+
+#: src/Subscriptions.php:154
+msgid "Action Failed, Invalid Nonce"
+msgstr ""
+
+#: src/Subscriptions.php:183
+msgid "Subscription Renewal Processed"
 msgstr ""
 
 #. Plugin URI of the plugin/theme

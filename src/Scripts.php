@@ -58,6 +58,41 @@ class Scripts {
 			wp_dequeue_script( 'wc-password-strength-meter' );
 
 		}, 100 );
+
+		// adds admin scripts
+		add_action( 'admin_enqueue_scripts', function() {
+
+			wc_dev_helper()->get_scripts_instance()->load_admin_scripts();
+
+		} );
+	}
+
+
+	/**
+	 * Loads admin-only scripts where needed.
+	 *
+	 * @since 1.0.0
+	 */
+	private function load_admin_scripts() {
+
+		$memberships = wc_dev_helper()->get_memberships_instance();
+
+		// add script for handling the memberships bulk generator
+		if ( $memberships && $memberships->is_bulk_generation_screen() ) {
+
+			wp_enqueue_script( 'wc-dev-helper-memberships-bulk-generation', wc_dev_helper()->get_plugin_url() . '/assets/js/admin/wc-dev-helper-memberships-bulk-generation.min.js', array( 'jquery' ), Plugin::VERSION, true );
+
+			wp_localize_script( 'wc-dev-helper-memberships-bulk-generation', 'wc_dev_helper_memberships_bulk_generation', array(
+
+				'admin_url'                                     => admin_url( 'admin-ajax.php' ),
+				'start_memberships_bulk_generation_nonce'       => wp_create_nonce( 'start-memberships-bulk-generation' ),
+				'get_memberships_bulk_generation_status_nonce'  => wp_create_nonce( 'get-memberships-bulk-generation-status' ),
+				'start_memberships_bulk_destruction_nonce'      => wp_create_nonce( 'start-memberships-bulk-destruction' ),
+				'get_memberships_bulk_destruction_status_nonce' => wp_create_nonce( 'get-memberships-bulk-destruction-status' ),
+
+				'i18n' => array()
+			) );
+		}
 	}
 
 
