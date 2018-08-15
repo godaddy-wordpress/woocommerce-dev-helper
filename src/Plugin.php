@@ -156,9 +156,9 @@ class Plugin extends Framework\SV_WC_Plugin {
 	/**
 	 * Include required files
 	 *
-	 * @since 0.1.0
+	 * @since 1.0.0
 	 */
-	public function includes() {
+	private function includes() {
 
 		$this->scripts = new Scripts();
 
@@ -262,19 +262,6 @@ class Plugin extends Framework\SV_WC_Plugin {
 	public function get_ajax_instance() {
 
 		return $this->ajax;
-	}
-
-
-	/**
-	 * Returns the tools handler instance.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @return Tools instance
-	 */
-	public function get_tools_instance() {
-
-		return $this->tools;
 	}
 
 

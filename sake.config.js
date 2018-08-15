@@ -1,3 +1,3 @@
 module.exports = {
-    framework: 'v5'
+  framework: 'v5'
 }
