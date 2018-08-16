@@ -158,6 +158,19 @@ class Memberships {
 
 		}, 100 );
 
+		// WordPress would automatically convert some HTML entities into emoji in the settings page
+		add_action( 'init', function() {
+
+			$memberships = wc_dev_helper()->get_memberships_instance();
+
+			if ( $memberships && $memberships->is_bulk_generation_screen() ) {
+
+				remove_action( 'admin_print_styles',  'print_emoji_styles' );
+				remove_action( 'wp_head',             'print_emoji_detection_script', 7 );
+				remove_action( 'admin_print_scripts', 'print_emoji_detection_script' );
+			}
+		} );
+
 		// adds the tool tab content
 		add_action( 'admin_menu', function() {
 
@@ -171,6 +184,15 @@ class Memberships {
 
 					$current_action = isset( $_GET['action'] ) && 'destroy' === $_GET['action'] ? 'destroy' : 'generate';
 
+					if ( 'generate' === $current_action ) {
+						$background_job_handler = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_generator_instance();
+
+					} else {
+						$background_job_handler = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_destroyer_instance();
+					}
+
+					$job_in_progress = $background_job_handler ? $background_job_handler->get_job() : null;
+
 					?>
 					<div class="wrap woocommerce woocommerce-memberships woocommerce-memberships-bulk-generation">
 
@@ -183,27 +205,28 @@ class Memberships {
 
 						<?php if ( 'generate' === $current_action ) : ?>
 
-							<h2><?php esc_html_e( 'Generate User Memberships in Bulk', 'woocommerce-dev-helper' )?></h2>
+							<h2><?php esc_html_e( 'Generate Members in Bulk', 'woocommerce-dev-helper' )?></h2>
 
-							<p><?php esc_html_e( 'Create up to thousands of users, posts, products, categories, membership plans and user memberships in bulk.', 'woocommerce-dev-helper' ) ?></p>
-							<p><?php printf( __( 'This tool is intended for testing, development and demonstration purposes only. Memberships objects thus created can be later removed %1$susing the counterpart tool%2$s.', 'woocommerce-dev-helper' ), '<a href="' . admin_url( 'page=wc_memberships_bulk_generation&action=destroy' ) . '">', '</a>' ); ?></p>
-							<p><strong><?php esc_html_e( 'It is not advised to use this tool on a production site.', 'woocommerce-dev-helper' ); ?></strong></p>
+							<p><?php esc_html_e( 'Create up to thousands user memberships in bulk. Membership plans, content, products and users needed for the user memberships are also created accordingly.', 'woocommerce-dev-helper' ) ?></p>
+							<?php /* translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing </a> HTML link tag */ ?>
+							<p><?php printf( __( 'This tool is intended for testing, development and demonstration purposes only. Memberships objects thus created can be later removed %1$susing a counterpart tool%2$s.', 'woocommerce-dev-helper' ), '<a href="' . admin_url( 'page=wc_memberships_bulk_generation&action=destroy' ) . '">', '</a>' ); ?></p>
+							<p><strong><?php esc_html_e( 'It is strongly NOT advised to use this tool on a production site.', 'woocommerce-dev-helper' ); ?></strong></p>
 
-							<table id="wc-memberships-bulk-generate" class="form-table">
+							<table id="bulk-generate-memberships" class="form-table memberships-bulk-generation-tool">
 								<tbody>
 									<tr valign="top">
 										<th scope="row" class="titledesc">
-											<label for="memberships-to-generate"><?php esc_html_e( 'Number of Memberships', 'woocommerce-dev-helper' ); ?></label>
+											<label for="members-to-generate"><?php esc_html_e( 'Number of Members', 'woocommerce-dev-helper' ); ?></label>
 										</th>
 										<td class="forminp">
 											<input
 												type="number"
-												id="memberships-to-generate"
+												id="members-to-generate"
 												min="1"
 												max="1000000"
 												step="1"
-												value="1000"
-											/> <span class="description"><?php esc_html_e( 'Enter the total number of memberships to generate in bulk.', 'woocommerce-dev-helper' ); ?></span>
+												value="100"
+											/> <span class="description"><?php esc_html_e( 'Enter the number of users to assign memberships to that will be generated in bulk.', 'woocommerce-dev-helper' ); ?></span>
 										</td>
 									</tr>
 									<tr>
@@ -212,9 +235,12 @@ class Memberships {
 											<span class="description"><?php esc_html_e( 'Once launched, the operation cannot be stopped.', 'woocommerce-dev-helper' ) ?></span>
 											<br /><br />
 											<button
-												id="generate-memberships"
-												class="button button-primary"><?php
+												id="process-memberships"
+												class="button button-primary generate-memberships"
+												<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
 												esc_html_e( 'Generate', 'woocommerce-dev-helper' ); ?></button>
+											<span id="bulk-processing-memberships-spinner" class="spinner" style="float: none;"></span>
+											<p id="bulk-generate-status" class="bulk-generation-status"></p>
 										</td>
 									</tr>
 								</tbody>
@@ -222,22 +248,26 @@ class Memberships {
 
 						<?php else : ?>
 
-							<h2><?php esc_html_e( 'Destroy Memberships Created in Bulk', 'woocommerce-dev-helper' )?></h2>
+							<h2><?php esc_html_e( 'Destroy Membership Objects Created in Bulk', 'woocommerce-dev-helper' )?></h2>
 
-							<p><?php esc_html_e( 'This tool will permanently remove user memberships, membership plans, posts, products and users previously created with the bulk generation tool.', 'woocommerce-dev-helper' ) ?></p>
+							<?php /* translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing </a> HTML link tag */ ?>
+							<p><?php printf( __( 'This tool will permanently remove user memberships, membership plans, posts, products and users previously created with the %1$sbulk generation tool%2$s.', 'woocommerce-dev-helper' ), '<a href="' . admin_url( 'page=wc_memberships_bulk_generation' ) . '">', '</a>' ); ?></p>
 							<p><?php esc_html_e( 'Membership objects, users and other WordPress content created otherwise will not be affected.', 'woocommerce-dev-helper' ); ?></p>
-							<p><strong><?php esc_html_e( 'It is not advised to use this tool on a production site.', 'woocommerce-dev-helper' ); ?></strong></p>
+							<p><strong><?php esc_html_e( 'It is strongly NOT advised to use this tool on a production site.', 'woocommerce-dev-helper' ); ?></strong></p>
 
-							<table id="wc-memberships-bulk-destroy" class="form-table">
+							<table id="bulk-destroy-memberships" class="form-table memberships-bulk-generation-tool">
 								<tbody>
 									<tr>
 										<td class="forminp" colspan="2">
 											<span class="description"><?php esc_html_e( 'Once launched, the operation cannot be stopped.', 'woocommerce-dev-helper' ) ?></span>
 											<br /><br />
 											<button
-												id="destroy-memberships"
-												class="button button-primary"><?php
+												id="process-memberships"
+												class="button button-primary destroy-memberships"
+												<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
 												esc_html_e( 'Destroy', 'woocommerce-dev-helper' ); ?></button>
+											<span id="bulk-processing-memberships-spinner" class="spinner" style="float: none;"></span>
+											<p id="bulk-destroy-status" class="bulk-generation-status"></p>
 										</td>
 									</tr>
 								</tbody>

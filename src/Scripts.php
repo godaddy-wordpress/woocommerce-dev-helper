@@ -80,17 +80,32 @@ class Scripts {
 		// add script for handling the memberships bulk generator
 		if ( $memberships && $memberships->is_bulk_generation_screen() ) {
 
+			$generator = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_generator_instance();
+			$generator = $generator ? $generator->get_job() : null;
+			$destroyer = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_destroyer_instance();
+			$destroyer = $destroyer ? $destroyer->get_job() : null;
+
 			wp_enqueue_script( 'wc-dev-helper-memberships-bulk-generation', wc_dev_helper()->get_plugin_url() . '/assets/js/admin/wc-dev-helper-memberships-bulk-generation.min.js', array( 'jquery' ), Plugin::VERSION, true );
 
 			wp_localize_script( 'wc-dev-helper-memberships-bulk-generation', 'wc_dev_helper_memberships_bulk_generation', array(
 
-				'admin_url'                                     => admin_url( 'admin-ajax.php' ),
+				'ajax_url'                                      => admin_url( 'admin-ajax.php' ),
+				'bulk_generation_job_in_progress'               => $generator ? $generator->id : false,
+				'bulk_destruction_job_in_progress'              => $destroyer ? $destroyer->id : false,
 				'start_memberships_bulk_generation_nonce'       => wp_create_nonce( 'start-memberships-bulk-generation' ),
 				'get_memberships_bulk_generation_status_nonce'  => wp_create_nonce( 'get-memberships-bulk-generation-status' ),
 				'start_memberships_bulk_destruction_nonce'      => wp_create_nonce( 'start-memberships-bulk-destruction' ),
 				'get_memberships_bulk_destruction_status_nonce' => wp_create_nonce( 'get-memberships-bulk-destruction-status' ),
 
-				'i18n' => array()
+				'i18n' => array(
+					'generation_in_progress'  => __( 'Members generation in progress...', 'woocommerce-dev-helper' ),
+					'generation_success'      => __( 'Members generation complete!', 'woocommerce-dev-helper' ),
+					'generation_failure'      => __( 'Members generation failed!', 'woocommerce-dev-helper' ),
+					'destruction_in_progress' => __( 'Removing membership objects...', 'woocommerce-dev-helper' ),
+					'destruction_success'     => __( 'Membership objects successfully removed.', 'woocommerce-dev-helper' ),
+					'destruction_failure'     => __( 'An error occurred while removing membership objects.', 'woocommerce-dev-helper' ),
+				),
+
 			) );
 		}
 	}

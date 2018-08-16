@@ -292,6 +292,19 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 
 	/**
+	 * Returns the tools handler instance.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return Tools instance
+	 */
+	public function get_tools_instance() {
+
+		return $this->tools;
+	}
+
+
+	/**
 	 * Returns the Subscriptions helper instance
 	 *
 	 * @since 1.0.0
