@@ -245,7 +245,7 @@ class Memberships {
 												class="button button-primary generate-memberships"
 												<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
 												esc_html_e( 'Generate', 'woocommerce-dev-helper' ); ?></button>
-											<span id="bulk-processing-memberships-spinner" class="spinner" style="float: none;"></span>
+											<span id="bulk-processing-memberships-spinner" class="spinner <?php echo $generator_job_in_progress ? 'is-active' : ''; ?>" style="float: none;"></span>
 											<p id="bulk-generate-status" class="bulk-generation-status"><?php echo esc_html( $job_message ); ?></p>
 										</td>
 									</tr>
@@ -272,7 +272,7 @@ class Memberships {
 												class="button button-primary destroy-memberships"
 												<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
 												esc_html_e( 'Destroy', 'woocommerce-dev-helper' ); ?></button>
-											<span id="bulk-processing-memberships-spinner" class="spinner" style="float: none;"></span>
+											<span id="bulk-processing-memberships-spinner" class="spinner <?php echo $destroyer_job_in_progress ? 'is-active' : ''; ?>" style="float: none;"></span>
 											<p id="bulk-destroy-status" class="bulk-generation-status"><?php echo esc_html( $job_message ); ?></p>
 										</td>
 									</tr>
