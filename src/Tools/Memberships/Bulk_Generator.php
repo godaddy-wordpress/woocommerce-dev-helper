@@ -444,11 +444,14 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function create_user( $user_login ) {
 
+		add_filter( 'wc_memberships_grant_access_to_free_membership', '__return_false', -1 );
+
 		$user    = null;
 		$login   = $this->add_prefix( $user_login );
 		$user_id = wp_insert_user( array(
+			// the login and password will match for every user
 			'user_login' => $login,
-			'user_pass'  => wp_generate_password(),
+			'user_pass'  => $login,
 			// e.g. `wc_dev_helper_user_123@example.com`
 			'user_email' => str_replace( array( '-', ' ' ), '_', trim( "{$login}@example.com" ) ),
 			'role'       => 'customer',
@@ -457,6 +460,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 		if ( is_numeric( $user_id ) ) {
 			$user = get_user_by( 'id', $user_id );
 		}
+
+		remove_filter( 'wc_memberships_grant_access_to_free_membership', '__return_false', -1 );
 
 		return $user instanceof \WP_User ? $user : null;
 	}
