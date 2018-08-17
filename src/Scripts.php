@@ -90,6 +90,8 @@ class Scripts {
 			wp_localize_script( 'wc-dev-helper-memberships-bulk-generation', 'wc_dev_helper_memberships_bulk_generation', array(
 
 				'ajax_url'                                      => admin_url( 'admin-ajax.php' ),
+				'is_bulk_generation_screen'                     => $memberships->is_bulk_generation_screen( 'generate' ),
+				'is_bulk_destruction_screen'                    => $memberships->is_bulk_generation_screen( 'destroy' ),
 				'bulk_generation_job_in_progress'               => $generator ? $generator->id : false,
 				'bulk_destruction_job_in_progress'              => $destroyer ? $destroyer->id : false,
 				'start_memberships_bulk_generation_nonce'       => wp_create_nonce( 'start-memberships-bulk-generation' ),

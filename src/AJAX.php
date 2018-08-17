@@ -188,7 +188,7 @@ class AJAX {
 
 		check_ajax_referer( $which_job, 'security' );
 
-		if ( isset( $_POST['job_id'] ) ) {
+		if ( ! empty( $_POST['job_id'] ) ) {
 
 			if ( 'get-memberships-bulk-generation-status' === $which_job ) {
 				$generator = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_generator_instance();
@@ -211,7 +211,7 @@ class AJAX {
 					try {
 						$job = $generator->process_job( $job );
 					} catch ( \Exception $e ) {
-						wp_send_json_error( $e->getMessage() );
+						wp_send_json_error( 'mammt' . $e->getMessage() );
 					}
 				}
 

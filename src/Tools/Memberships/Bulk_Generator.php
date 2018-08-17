@@ -324,7 +324,6 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 * @param string $user_login item to process
 	 * @param \stdClass $job job object
 	 * @return \stdClass modified job object
-	 * @throws Framework\SV_WC_Plugin_Exception
 	 */
 	public function process_item( $user_login, $job ) {
 
@@ -342,7 +341,6 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 * @param \WP_User $user user object
 	 * @param \stdClass $job job object
 	 * @return \stdClass $job updated job object with generated object IDs
-	 * @throws Framework\SV_WC_Plugin_Exception on membership creation errors
 	 */
 	private function create_user_membership( $user, $job ) {
 
@@ -366,22 +364,45 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 						// stores a record of new objects created during plan creation
 						$job = $this->record_objects_ids( $membership_plan, $job );
 
-						try {
+						// do not use `wc_memberships_create_user_membership()` to reduce a bit of overhead
+						$post_id = wp_insert_post( array(
+							'post_parent'    => $membership_plan->get_id(),
+							'post_author'    => $user->ID,
+							'post_type'      => 'wc_user_membership',
+							'post_status'    => 'wcm-active',
+							'comment_status' => 'open',
+						) );
 
-							// finally, creates a membership
-							$user_membership = wc_memberships_create_user_membership( array(
-								'plan_id'    => $membership_plan->get_id(),
-								'user_id'    => $user->ID,
-								'product_id' => 0,
-								'order_id'   => 0,
-							) );
+						if ( is_numeric( $post_id ) ) {
 
 							// record the user membership ID just created
-							$job = $this->record_object_id( $job, 'memberships', $user_membership->get_id() );
+							$job = $this->record_object_id( $job, 'memberships', $post_id );
 
-						} catch ( \Exception $e ) {
+							$user_membership = new \WC_Memberships_User_Membership( $post_id );
 
-							throw new Framework\SV_WC_Plugin_Exception( $e->getMessage() );
+							$now = current_time( 'timestamp', true );
+
+							if ( $user_membership->get_plan()->is_access_length_type( 'fixed' ) ) {
+								$start_time = mt_rand( $now - YEAR_IN_SECONDS, $now + MONTH_IN_SECONDS );
+							} else {
+								$start_time = mt_rand( $now - MONTH_IN_SECONDS, $user_membership->get_plan()->get_access_start_date( 'timestamp' ) );
+							}
+
+							// set dates and expiration events
+							$user_membership->set_start_date( date( 'Y-m-d H:i:s', $start_time ) );
+							$user_membership->set_end_date( $user_membership->get_end_date( 'timestamp' ) );
+
+							// some memberships will be randomly paused, others may be delayed, a few less may be cancelled
+							if ( $user_membership->is_active() && 'delayed' !== $user_membership->get_status() ) {
+
+								$random_number = mt_rand( 1, 35 );
+
+								if ( 1 === $random_number ) {
+									$user_membership->cancel_membership( __( 'Membership randomly cancelled during automatic bulk generation.', 'woocommerce-dev-helper' ) );
+								} elseif ( $random_number > 32 ) {
+									$user_membership->pause_membership( __( 'Membership randomly paused during automatic bulk generation.', 'woocommerce-dev-helper' ) );
+								}
+							}
 						}
 					}
 				}
@@ -489,7 +510,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			$plan = wc_memberships_get_membership_plan( $plan_slug );
 
 			// check if plan exists, or create it
-			if ( ! $plan ) {
+			if ( empty( $plan ) ) {
 				$plan = $this->create_membership_plan( $which_plan );
 			// if found, ensures the plan slug matches the requested one
 			} elseif ( $plan->get_slug() !== $plan_slug ) {
@@ -723,6 +744,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			$product_posts = get_posts( array(
 				'name'           => $this->add_prefix( $which_product ),
 				'post_type'      => 'product',
+				'post_status'    => 'any',
 				'posts_per_page' => 1,
 			) );
 
@@ -843,6 +865,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 			$content_type_name = $rule->get_content_type_name();
 
+			// TODO record taxonomy terms (categories, product cats...) {FN 2018-09-17}
+
 			foreach ( $rule->get_object_ids() as $object_id ) {
 				if ( 'post' === $content_type_name ) {
 					$job = $this->record_object_id( $job, 'posts', $object_id );
@@ -870,16 +894,16 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function record_object_id( $job, $key, $id ) {
 
-		if ( null !== $job && is_numeric( $id ) && (int) $id > 0 && in_array( $key, $this->get_objects_keys(), true ) ) {
+		if ( null !== $job && isset( $job->objects ) && is_numeric( $id ) && (int) $id > 0 && in_array( $key, $this->get_objects_keys(), true ) ) {
 
-			if ( ! isset( $job->{$key} ) ) {
-				$job->{$key} = array();
+			if ( ! isset( $job->objects[ $key ] ) ) {
+				$job->objects[ $key ] = array();
 			} else {
-				$job->{$key} = (array) $job->{$key};
+				$job->objects[ $key ] = (array) $job->objects[ $key ];
 			}
 
-			if ( ! in_array( (int) $id, $job->{$key}, true ) ) {
-				$job->{$key}[] = (int) $id;
+			if ( ! in_array( (int) $id, (array) $job->objects[ $key ], true ) ) {
+				$job->objects[ $key ][] = (int) $id;
 			}
 		}
 

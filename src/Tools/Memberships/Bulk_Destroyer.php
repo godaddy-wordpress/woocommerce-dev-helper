@@ -137,14 +137,17 @@ class Bulk_Destroyer extends Framework\SV_WP_Background_Job_Handler {
 	/**
 	 * Processes a job.
 	 *
+	 * This is a tweaked version of the parent framework method.
+	 * We process only one item at the time, but each item includes a batch of IDs that are bulk deleted via MySQL query.
+	 *
 	 * @since 1.0.0
 	 *
 	 * @param \stdClass $job job object
-	 * @param int $items_per_batch number of items to process in a single request (defaults to unlimited)
+	 * @param int $items_per_batch number of items to process in a single request (defaults to 1)
 	 * @return \stdClass $job
 	 * @throws Framework\SV_WC_Plugin_Exception when job data is incorrect or an error occurred
 	 */
-	public function process_job( $job, $items_per_batch = null ) {
+	public function process_job( $job, $items_per_batch = 1 ) {
 
 		if ( ! $this->start_time ) {
 			$this->start_time = time();
@@ -229,19 +232,21 @@ class Bulk_Destroyer extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	public function process_item( $object_count, $job ) {
 
-		$handler = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_generator_instance();
+		$generator = wc_dev_helper()->get_tools_instance()->get_memberships_bulk_generator_instance();
 
-		if ( ! $handler ) {
+		if ( ! $generator ) {
 			throw new Framework\SV_WC_Plugin_Exception( __( 'Could not query generated object IDs to remove.', 'woocommerce-dev-helper' ) );
 		}
 
-		if ( $objects = $handler->get_generated_objects_ids() ) {
+		if ( $objects = $generator->get_generated_objects_ids() ) {
 
-			$object_names = $handler->get_objects_keys();
+			$object_names = $generator->get_objects_keys();
 
 			foreach ( $object_names as $object_name ) {
 
 				if ( ! empty( $objects[ $object_name ] ) && is_array( $objects[ $object_name ] ) ) {
+
+					// TODO instead of deleting objects one by one, use a single wpdb query to delete all IDs in bulk {FN 2018-09-17}
 
 					$index = key( $objects[ $object_name ] );
 					$id    = current( $objects[ $object_name ] );
@@ -277,7 +282,7 @@ class Bulk_Destroyer extends Framework\SV_WP_Background_Job_Handler {
 			}
 
 			// update the option
-			$handler->set_generated_objects_ids( $objects );
+			$generator->set_generated_objects_ids( $objects );
 		}
 
 		return $job;
