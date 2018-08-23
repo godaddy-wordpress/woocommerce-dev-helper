@@ -5,13 +5,38 @@ msgstr ""
 "Project-Id-Version: A WooCommerce Dev Helper 1.0.0\n"
 "Report-Msgid-Bugs-To: "
 "https://woocommerce.com/my-account/marketplace-ticket-form/\n"
-"POT-Creation-Date: 2018-08-15 05:35:32+00:00\n"
+"POT-Creation-Date: 2018-08-23 09:07:18+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: src/AJAX.php:102 src/AJAX.php:162
+msgid "There is an existing job in the queue that has not completed yet."
+msgstr ""
+
+#: src/AJAX.php:105 src/AJAX.php:165 src/AJAX.php:229
+msgid "Could not load the background job handler."
+msgstr ""
+
+#: src/AJAX.php:108
+msgid "Invalid or missing options."
+msgstr ""
+
+#: src/AJAX.php:159
+msgid "There seem to be no objects to remove."
+msgstr ""
+
+#: src/AJAX.php:207
+#. translators: Placeholder: %s - job ID
+msgid "The background job with ID %s could not be found."
+msgstr ""
+
+#: src/AJAX.php:232
+msgid "Undefined background job ID."
+msgstr ""
 
 #: src/Gateways/Bogus.php:51
 msgid "Bogus"
@@ -81,7 +106,7 @@ msgstr ""
 msgid "hour(s)"
 msgstr ""
 
-#: src/Memberships.php:113 src/Memberships.php:166 src/Memberships.php:167
+#: src/Memberships.php:113 src/Memberships.php:179 src/Memberships.php:180
 msgid "Bulk Generation"
 msgstr ""
 
@@ -89,68 +114,110 @@ msgstr ""
 msgid "Memberships Bulk Generation"
 msgstr ""
 
-#: src/Memberships.php:178
+#: src/Memberships.php:197
+msgid ""
+"A background job is currently running to remove previously generated "
+"membership objects. Please wait until the job has completed before "
+"generating new members."
+msgstr ""
+
+#: src/Memberships.php:199
+msgid ""
+"A background job is currently running to generate members. Please wait "
+"until the job has completed to be able to remove the membership objects "
+"created by that process."
+msgstr ""
+
+#: src/Memberships.php:206
 msgid "Generate Memberships"
 msgstr ""
 
-#: src/Memberships.php:179
+#: src/Memberships.php:207
 msgid "Destroy Memberships"
 msgstr ""
 
-#: src/Memberships.php:186
-msgid "Generate User Memberships in Bulk"
+#: src/Memberships.php:214
+msgid "Generate Members in Bulk"
 msgstr ""
 
-#: src/Memberships.php:188
+#: src/Memberships.php:216
 msgid ""
-"Create up to thousands of users, posts, products, categories, membership "
-"plans and user memberships in bulk."
+"Create up to thousands user memberships in bulk. Membership plans, content, "
+"products and users needed for the user memberships are also created "
+"accordingly."
 msgstr ""
 
-#: src/Memberships.php:189
+#: src/Memberships.php:218
+#. translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing
+#. </a> HTML link tag
 msgid ""
 "This tool is intended for testing, development and demonstration purposes "
-"only. Memberships objects thus created can be later removed %1$susing the "
+"only. Memberships objects thus created can be later removed %1$susing a "
 "counterpart tool%2$s."
 msgstr ""
 
-#: src/Memberships.php:190 src/Memberships.php:250
-msgid "It is not advised to use this tool on a production site."
+#: src/Memberships.php:219 src/Memberships.php:295
+msgid "It is strongly NOT advised to use this tool on a production site."
 msgstr ""
 
-#: src/Memberships.php:196
-msgid "Number of Memberships"
+#: src/Memberships.php:225
+msgid "Number of Members"
 msgstr ""
 
-#: src/Memberships.php:227
-msgid "Enter the total number of memberships to generate in bulk."
+#: src/Memberships.php:236
+msgid ""
+"Enter the number of users to assign memberships to that will be generated "
+"in bulk."
 msgstr ""
 
-#: src/Memberships.php:233 src/Memberships.php:256
+#: src/Memberships.php:241
+msgid "Min Memberships per User"
+msgstr ""
+
+#: src/Memberships.php:252
+msgid ""
+"Enter the minimum number of memberships that each user should have. You can "
+"enter 0 to generate non member users randomly."
+msgstr ""
+
+#: src/Memberships.php:257
+msgid "Max Memberships per User"
+msgstr ""
+
+#: src/Memberships.php:268
+msgid ""
+"Enter the maximum number of membership plans each user should have access "
+"to."
+msgstr ""
+
+#: src/Memberships.php:274 src/Memberships.php:301
 msgid "Once launched, the operation cannot be stopped."
 msgstr ""
 
-#: src/Memberships.php:238
+#: src/Memberships.php:280
 msgid "Generate"
 msgstr ""
 
-#: src/Memberships.php:246
-msgid "Destroy Memberships Created in Bulk"
+#: src/Memberships.php:290
+msgid "Destroy Membership Objects Created in Bulk"
 msgstr ""
 
-#: src/Memberships.php:248
+#: src/Memberships.php:293
+#. translators: Placeholders: %1$s - opening <a> HTML link tag, %2$s - closing
+#. </a> HTML link tag
 msgid ""
 "This tool will permanently remove user memberships, membership plans, "
-"posts, products and users previously created with the bulk generation tool."
+"posts, products and users previously created with the %1$sbulk generation "
+"tool%2$s."
 msgstr ""
 
-#: src/Memberships.php:249
+#: src/Memberships.php:294
 msgid ""
 "Membership objects, users and other WordPress content created otherwise "
 "will not be affected."
 msgstr ""
 
-#: src/Memberships.php:261
+#: src/Memberships.php:307
 msgid "Destroy"
 msgstr ""
 
@@ -158,20 +225,86 @@ msgstr ""
 msgid "A WooCommerce Dev Helper"
 msgstr ""
 
-#: src/Subscriptions.php:78
+#: src/Scripts.php:103
+msgid "Members generation in progress..."
+msgstr ""
+
+#: src/Scripts.php:104
+msgid "Members generation complete!"
+msgstr ""
+
+#: src/Scripts.php:105
+msgid "Members generation failed!"
+msgstr ""
+
+#: src/Scripts.php:106
+msgid "Removing membership objects..."
+msgstr ""
+
+#: src/Scripts.php:107
+msgid "Membership objects successfully removed."
+msgstr ""
+
+#: src/Scripts.php:108
+msgid "An error occurred while removing membership objects."
+msgstr ""
+
+#: src/Subscriptions.php:81
 msgid "Renew"
 msgstr ""
 
-#: src/Subscriptions.php:131
+#: src/Subscriptions.php:138
 msgid "Subscription renewal processed. %sView Renewal Order%s"
 msgstr ""
 
-#: src/Subscriptions.php:154
-msgid "Action Failed, Invalid Nonce"
+#: src/Tools/Memberships/Bulk_Destroyer.php:168
+#: src/Tools/Memberships/Bulk_Generator.php:260
+msgid "Job data key \"%s\" not set"
 msgstr ""
 
-#: src/Subscriptions.php:183
-msgid "Subscription Renewal Processed"
+#: src/Tools/Memberships/Bulk_Destroyer.php:172
+#: src/Tools/Memberships/Bulk_Generator.php:264
+msgid "Job data key \"%s\" is not an array"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Destroyer.php:238
+msgid "Could not query generated object IDs to remove."
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:384
+msgid "Membership automatically generated for testing purposes."
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:404
+msgid "Membership randomly cancelled during automatic bulk generation."
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:406
+msgid "Membership randomly paused during automatic bulk generation."
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:637
+msgid "Test Membership Plan A (manual only)"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:642
+msgid "Test Membership Plan B (signup)"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:647
+msgid "Test Membership Plan C (purchase)"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:854
+msgid "Simple Product A"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:858
+msgid "Simple Product B"
+msgstr ""
+
+#: src/Tools/Memberships/Bulk_Generator.php:862
+msgid "Simple Product C"
 msgstr ""
 
 #. Plugin URI of the plugin/theme

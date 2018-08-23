@@ -156,8 +156,10 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 		}
 
 		$args = wp_parse_args( $args, array(
-			'members' => array(),
-			'objects' => $objects,
+			'members_to_generate'      => array(),
+			'min_memberships_per_user' => isset( $args['min_memberships_per_user'] ) ? (int) $args['min_memberships_per_user'] : 1,
+			'max_memberships_per_user' => isset( $args['max_memberships_per_user'] ) ? (int) $args['max_memberships_per_user'] : 1,
+			'objects'                  => $objects,
 		) );
 
 		return parent::create_job( $args );
@@ -347,12 +349,13 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 		if ( $user instanceof \WP_User ) {
 
 			// record the user ID
-			$job   = $this->record_object_id( $job, 'users', $user->ID );
-			$slugs = $this->get_membership_plans_slugs();
+			$job = $this->record_object_id( $job, 'users', $user->ID );
 
-			// each user gets randomly assigned 1 or 2 plans
-			// TODO turn this into a generator setting to have a variable number or even the possibility to skip a membership for some generated users
-			$plan_slugs = array_rand( array_combine( $slugs, $slugs ), mt_rand( 1, 2 ) );
+			// each user gets from 0 to n memberships randomly
+			$min_plans  = isset( $job->min_memberships_per_user ) && is_numeric( $job->min_memberships_per_user ) ? max( 0, (int) $job->min_memberships_per_user ) : 1;
+			$max_plans  = isset( $job->max_memberships_per_user ) && is_numeric( $job->max_memberships_per_user ) ? max( 1, (int) $job->min_memberships_per_user ) : 2;
+			$plan_slugs = $this->get_membership_plans_slugs();
+			$plan_slugs = array_unique( array_rand( array_combine( $plan_slugs, $plan_slugs ), mt_rand( $min_plans, $max_plans ) ) );
 
 			if ( ! empty( $plan_slugs ) && is_array( $plan_slugs ) )  {
 
@@ -379,6 +382,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 							$job = $this->record_object_id( $job, 'memberships', $post_id );
 
 							$user_membership = new \WC_Memberships_User_Membership( $post_id );
+
+							$user_membership->add_note( __( 'Membership automatically generated for testing purposes.', 'woocommerce-dev-helper' ) );
 
 							$now = current_time( 'timestamp', true );
 
@@ -444,11 +449,11 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function create_user( $user_login ) {
 
-		add_filter( 'wc_memberships_grant_access_to_free_membership', '__return_false', -1 );
+		add_filter( 'wc_memberships_grant_access_to_free_membership', array( $this, 'do_not_grant_free_memberships_automatically' ), 999 );
 
-		$user    = null;
-		$login   = $this->add_prefix( $user_login );
-		$user_id = wp_insert_user( array(
+		$user  = null;
+		$login = $this->add_prefix( $user_login );
+		$user  = wp_insert_user( array(
 			// the login and password will match for every user
 			'user_login' => $login,
 			'user_pass'  => $login,
@@ -457,13 +462,31 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			'role'       => 'customer',
 		) );
 
-		if ( is_numeric( $user_id ) ) {
-			$user = get_user_by( 'id', $user_id );
+		if ( is_numeric( $user ) ) {
+			$user = get_user_by( 'id', (int) $user );
 		}
 
-		remove_filter( 'wc_memberships_grant_access_to_free_membership', '__return_false', -1 );
+		remove_filter( 'wc_memberships_grant_access_to_free_membership', array( $this, 'do_not_grant_free_memberships_automatically' ), 999 );
 
 		return $user instanceof \WP_User ? $user : null;
+	}
+
+
+	/**
+	 * Callback for not granting a free membership when creating a user.
+	 *
+	 * This is because free memberships are rather created programmatically.
+	 * The user is not given access to other plans that exist outside those created by the generator.
+	 *
+	 * @internal
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return false
+	 */
+	public function do_not_grant_free_memberships_automatically() {
+
+		return false;
 	}
 
 
@@ -563,7 +586,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 				if ( 'purchase' === $plan->get_access_method() ) {
 
 					// one product is picked at random to be the access product
-					$random_product = array_rand( array_keys( $this->get_products_data() ), 1 );
+					$product_slugs  = array_keys( $this->get_products_data() );
+					$random_product = array_rand( array_combine( $product_slugs, $product_slugs ), 1 );
 					$access_product = $this->get_product( $random_product );
 
 					// sanity check: revert to manual-only in case of errors
@@ -790,9 +814,22 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 			if ( is_numeric( $product_id ) ) {
 
-				$product = new \WC_Product_Simple( $product_id );
+				$product    = new \WC_Product_Simple( $product_id );
+				$reg_price  = isset( $product_data['regular_price'] ) ? (float) $product_data['price'] : 0;
+				$sale_price = isset( $product_data['sale_price'] ) && is_numeric( $product_data['sale_price'] ) ? (float) $product_data['sale_price'] : null;
 
-				$product->set_price( isset( $product_data['price'] ) ? (float) $product_data['price'] : 0 );
+				$product->set_regular_price( $reg_price );
+				$product->set_price( $reg_price );
+
+				if ( null !== $sale_price ) {
+
+					$product->set_sale_price( $sale_price );
+
+					if ( $sale_price < $reg_price ) {
+						$product->set_price( $sale_price );
+					}
+				}
+
 				$product->save();
 			}
 		}
@@ -829,16 +866,16 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 		return array(
 			'simple-product-a' => array(
-				'post_title' => __( 'Simple Product A', 'woocommerce-dev-helper' ),
-				'price' => 1,
+				'post_title'    => __( 'Simple Product A', 'woocommerce-dev-helper' ),
+				'regular_price' => 1,
 			),
 			'simple-product-b' => array(
-				'post_title' => __( 'Simple Product B', 'woocommerce-dev-helper' ),
-				'price' => 10
+				'post_title'    => __( 'Simple Product B', 'woocommerce-dev-helper' ),
+				'regular_price' => 10,
 			),
 			'simple-product-c' => array(
-				'post_title' => __( 'Simple Product C', 'woocommerce-dev-helper' ),
-				'price'      => 19.80,
+				'post_title'    => __( 'Simple Product C', 'woocommerce-dev-helper' ),
+				'regular_price' => 19.80,
 			),
 		);
 	}

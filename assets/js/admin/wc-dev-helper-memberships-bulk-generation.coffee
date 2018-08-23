@@ -113,7 +113,7 @@ jQuery( document ).ready ( $ ) ->
 			action = 'wc_dev_helper_memberships_bulk_generate'
 			which  = 'wc_dev_helper_get_memberships_bulk_generation_status'
 			nonce  = wc_dev_helper_memberships_bulk_generation.start_memberships_bulk_generation_nonce
-			count  = parseInt( $( '#members-to-generate' ).val(), 10 )
+			count  = if 'wc_dev_helper_memberships_bulk_generate' is action then parseInt( $( '#members-to-generate' ).val(), 10 ) else 0
 		# destroy memberships
 		else if $( this ).hasClass( 'destroy-memberships' )
 			action = 'wc_dev_helper_memberships_bulk_destroy'
@@ -128,11 +128,13 @@ jQuery( document ).ready ( $ ) ->
 		$( this ).prop( 'disabled', true )
 		$( '#bulk-processing-memberships-spinner' ).addClass( 'is-active' )
 
-		request = {
+		request   = {
 			data:
-				action: action
-				security: nonce
-				members_to_generate: count
+				action:                   action
+				security:                 nonce
+				members_to_generate:      count
+				min_memberships_per_user: if count > 0 then $( 'min-memberships-per-user' ).val() else 1
+				max_memberships_per_user: if count > 0 then $( 'max-memberships-per-user' ).val() else 1
 		}
 
 		$.post wc_dev_helper_memberships_bulk_generation.ajax_url, request.data, ( response ) ->

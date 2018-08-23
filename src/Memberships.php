@@ -228,11 +228,44 @@ class Memberships {
 											<input
 												type="number"
 												id="members-to-generate"
+												class="small-text"
 												min="1"
 												max="1000000"
 												step="1"
 												value="100"
 											/> <span class="description"><?php esc_html_e( 'Enter the number of users to assign memberships to that will be generated in bulk.', 'woocommerce-dev-helper' ); ?></span>
+										</td>
+									</tr>
+									<tr valign="top">
+										<th scope="row" class="titledesc">
+											<label for="min-memberships-per-user"><?php esc_html_e( 'Min Memberships per User', 'woocommerce-dev-helper' ); ?></label>
+										</th>
+										<td class="forminp">
+											<input
+												type="number"
+												id="min-memberships-per-user"
+												class="small-text"
+												min="0"
+												max="3"
+												step="1"
+												value="1"
+											/> <span class="description"><?php esc_html_e( 'Enter the minimum number of memberships that each user should have. You can enter 0 to generate non member users randomly.', 'woocommerce-dev-helper' ); ?></span>
+										</td>
+									</tr>
+									<tr valign="top">
+										<th scope="row" class="titledesc">
+											<label for="max-memberships-per-user"><?php esc_html_e( 'Max Memberships per User', 'woocommerce-dev-helper' ); ?></label>
+										</th>
+										<td class="forminp">
+											<input
+												type="number"
+												id="max-memberships-per-user"
+												class="small-text"
+												min="1"
+												max="3"
+												step="1"
+												value="3"
+											/> <span class="description"><?php esc_html_e( 'Enter the maximum number of membership plans each user should have access to.', 'woocommerce-dev-helper' ); ?></span>
 										</td>
 									</tr>
 									<tr>
