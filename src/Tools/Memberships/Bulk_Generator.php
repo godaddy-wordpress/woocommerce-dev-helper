@@ -94,6 +94,21 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 
 	/**
+	 * Checks whether there are object that have been generated.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return bool
+	 */
+	public function has_generated_object_ids() {
+
+		$objects = $this->get_generated_objects_ids();
+
+		return ! empty( $objects );
+	}
+
+
+	/**
 	 * Saves generated object IDs to an option.
 	 *
 	 * @since 1.0.0

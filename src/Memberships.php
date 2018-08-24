@@ -190,13 +190,17 @@ class Memberships {
 					$generator_job_in_progress = $generator ? $generator->get_job() : null;
 					$destroyer_job_in_progress = $destroyer ? $destroyer->get_job() : null;
 
-					$job_message     = '';
-					$job_in_progress = $generator_job_in_progress || $destroyer_job_in_progress;
+					$job_message       = '';
+					$job_in_progress   = $generator_job_in_progress || $destroyer_job_in_progress;
+					$generated_objects = $generator ? $generator->has_generated_object_ids() : false;
 
 					if ( $generator_job_in_progress && 'destroy' === $current_action ) {
-						$job_message = __( 'A background job is currently running to remove previously generated membership objects. Please wait until the job has completed before generating new members.', 'woocommerce-dev-helper' );
+						$job_message = esc_html__( 'A background job is currently running to remove previously generated membership objects. Please wait until the job has completed before generating new members.', 'woocommerce-dev-helper' );
 					} elseif ( $destroyer_job_in_progress && 'generate' === $current_action ) {
-						$job_message = __( 'A background job is currently running to generate members. Please wait until the job has completed to be able to remove the membership objects created by that process.', 'woocommerce-dev-helper' );
+						$job_message = esc_html__( 'A background job is currently running to generate members. Please wait until the job has completed to be able to remove the membership objects created by that process.', 'woocommerce-dev-helper' );
+					} elseif ( $generated_objects && 'generate' === $current_action ) {
+						/* translators: Placeholders: %1$s - opening <a> link HTML tag, %2$s - closing </a> link HTML tag */
+						$job_message = sprintf( esc_html__( 'Memberships have been generated already. Please %1$sdestroy existing objects%2$s before generating new ones.', 'woocommerce-dev-helper' ), '<a href="' . admin_url( 'admin.php?page=wc_memberships_bulk_generation&action=destroy' ) . '">', '</a>' );
 					}
 
 					?>
@@ -276,10 +280,10 @@ class Memberships {
 											<button
 												id="process-memberships"
 												class="button button-primary generate-memberships"
-												<?php disabled( (bool) $job_in_progress, true, true ); ?>><?php
+												<?php disabled( $job_in_progress || $generated_objects, true, true ); ?>><?php
 												esc_html_e( 'Generate', 'woocommerce-dev-helper' ); ?></button>
 											<span id="bulk-processing-memberships-spinner" class="spinner <?php echo $generator_job_in_progress ? 'is-active' : ''; ?>" style="float: none;"></span>
-											<p id="bulk-generate-status" class="bulk-generation-status"><?php echo esc_html( $job_message ); ?></p>
+											<p id="bulk-generate-status" class="bulk-generation-status"><?php echo $job_message; ?></p>
 										</td>
 									</tr>
 								</tbody>

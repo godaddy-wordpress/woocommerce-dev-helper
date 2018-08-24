@@ -261,6 +261,7 @@ class Bulk_Destroyer extends Framework\SV_WP_Background_Job_Handler {
 						case 'posts' :
 						case 'plans' :
 						case 'products' :
+						case 'orders' :
 							wp_delete_post( $id );
 						break;
 
