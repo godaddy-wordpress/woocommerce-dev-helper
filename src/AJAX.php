@@ -85,11 +85,10 @@ class AJAX {
 
 				if ( ! $existing_job ) {
 
-					$limit = max( 1, (int) $_POST['members_to_generate'] );
-					$job   = $generator->create_job( array(
-						'members_to_generate'      => $generator->generate_users_slugs( $limit ),
-						'min_memberships_per_user' => max( 0, isset( $_POST['min_memberships_per_user'] ) ) ? (int) $_POST['min_memberships_per_user'] : 1,
-						'max_memberships_per_user' => max( 1, isset( $_POST['min_memberships_per_user'] ) ) ? (int) $_POST['min_memberships_per_user'] : 1,
+					$job = $generator->create_job( array(
+						'members_to_generate'      => $generator->generate_users_slugs( max( 1, (int) $_POST['members_to_generate'] ) ),
+						'min_memberships_per_user' => isset( $_POST['min_memberships_per_user'] ) ? max( 0, (int) $_POST['min_memberships_per_user'] ) : 1,
+						'max_memberships_per_user' => isset( $_POST['max_memberships_per_user'] ) ? max( 1, (int) $_POST['max_memberships_per_user'] ) : 3,
 					) );
 
 					// dispatch the background processor

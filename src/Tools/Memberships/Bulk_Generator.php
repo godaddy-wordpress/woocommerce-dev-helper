@@ -48,7 +48,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 		$this->prefix   = 'wc_dev_helper';
 		$this->action   = 'memberships_bulk_generation';
-		$this->data_key = 'members';
+		$this->data_key = 'members_to_generate';
 
 		parent::__construct();
 	}
@@ -157,8 +157,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 		$args = wp_parse_args( $args, array(
 			'members_to_generate'      => array(),
-			'min_memberships_per_user' => isset( $args['min_memberships_per_user'] ) ? (int) $args['min_memberships_per_user'] : 1,
-			'max_memberships_per_user' => isset( $args['max_memberships_per_user'] ) ? (int) $args['max_memberships_per_user'] : 1,
+			'min_memberships_per_user' => isset( $args['min_memberships_per_user'] ) ? max( 0, (int) $args['min_memberships_per_user'] ) : 1,
+			'max_memberships_per_user' => isset( $args['max_memberships_per_user'] ) ? max( 1, (int) $args['max_memberships_per_user'] ) : 3,
 			'objects'                  => $objects,
 		) );
 
@@ -353,7 +353,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 			// each user gets from 0 to n memberships randomly
 			$min_plans  = isset( $job->min_memberships_per_user ) && is_numeric( $job->min_memberships_per_user ) ? max( 0, (int) $job->min_memberships_per_user ) : 1;
-			$max_plans  = isset( $job->max_memberships_per_user ) && is_numeric( $job->max_memberships_per_user ) ? max( 1, (int) $job->min_memberships_per_user ) : 2;
+			$max_plans  = isset( $job->max_memberships_per_user ) && is_numeric( $job->max_memberships_per_user ) ? max( 1, (int) $job->min_memberships_per_user ) : 3;
 			$plan_slugs = $this->get_membership_plans_slugs();
 			$plan_slugs = array_unique( array_rand( array_combine( $plan_slugs, $plan_slugs ), mt_rand( $min_plans, $max_plans ) ) );
 
@@ -387,6 +387,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 							$now = current_time( 'timestamp', true );
 
+							// membership start dates can be randomly generated
 							if ( $user_membership->get_plan()->is_access_length_type( 'fixed' ) ) {
 								$start_time = mt_rand( $now - YEAR_IN_SECONDS, $now + MONTH_IN_SECONDS );
 							} else {
@@ -400,12 +401,28 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 							// some memberships will be randomly paused, others may be delayed, a few less may be cancelled
 							if ( $user_membership->is_active() && 'delayed' !== $user_membership->get_status() ) {
 
-								$random_number = mt_rand( 1, 35 );
+								$random_number = mt_rand( 1, 25 );
 
 								if ( 1 === $random_number ) {
+									$user_membership->set_cancelled_date( mt_rand( $now, $user_membership->get_start_date( 'timestamp' ) ) );
 									$user_membership->cancel_membership( __( 'Membership randomly cancelled during automatic bulk generation.', 'woocommerce-dev-helper' ) );
-								} elseif ( $random_number > 32 ) {
+								} elseif ( $random_number > 23 ) {
+									$user_membership->set_paused_date( mt_rand( $now, $user_membership->get_start_date( 'timestamp' ) ) );
 									$user_membership->pause_membership( __( 'Membership randomly paused during automatic bulk generation.', 'woocommerce-dev-helper' ) );
+								}
+							}
+
+							// if it's a purchased membership, create an associated order
+							if ( $membership_plan->is_access_method( 'purchase' ) ) {
+
+								$user_membership->set_product_id( current( $membership_plan->get_product_ids() ) );
+
+								if ( $order = $this->get_order( $user_membership ) ) {
+
+									$user_membership->set_order_id( $order->get_id() );
+
+									// record the order ID to the job data for later deletion
+									$job = $this->record_object_id( $job, 'orders', $order->get_id() );
 								}
 							}
 						}
@@ -674,6 +691,102 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 
 	/**
+	 * Returns the order (to be) associated with a user membership.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WC_Memberships_User_Membership $user_membership the related user membership (purchase access)
+	 * @return null|\WC_Order
+	 */
+	private function get_order( \WC_Memberships_User_Membership $user_membership ) {
+
+		if ( ! $user_membership->get_order_id() ) {
+			$order = $this->create_order( $user_membership );
+		} else {
+			$order = $user_membership->get_order();
+		}
+
+		return $order instanceof \WC_Order ? $order : null;
+	}
+
+
+	/**
+	 * Creates an order object.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param \WC_Memberships_User_Membership $user_membership the related membership (purchase access)
+	 * @return null|\WC_Order
+	 */
+	private function create_order( \WC_Memberships_User_Membership $user_membership ) {
+
+		$order = null;
+
+		if ( $product = $user_membership->get_product() ) {
+
+			// insert the order to database, copy dates from membership
+			$start_gmt = $user_membership->get_start_date();
+			$start     = $user_membership->get_local_start_date();
+			$order_id  = wp_insert_post( array(
+				'post_author'   => get_current_user_id(),
+				'post_type'     => 'shop_order',
+				'post_status'   => 'completed',
+				'post_date'     => $start,
+				'post_date_gmt' => $start_gmt,
+			) );
+
+			if ( $order_id > 0 ) {
+
+				// build the order
+				$order = new \WC_Order( $order_id );
+				$data  = array(
+					'set_customer_id'    => $user_membership->get_user_id(),
+					'set_date_paid'      => $start_gmt,
+					'set_date_completed' => $start_gmt,
+				);
+
+				// set basic order props
+				foreach ( $data as $method => $set_value ) {
+					try {
+						$order->$method( $set_value );
+					} catch ( \Exception $e ) {
+						wc_dev_helper()->log( $e->getMessage() );
+					}
+				}
+
+				// make a single order item containing the product that grants access
+				$order_item_product = new \WC_Order_Item_Product( array() );
+
+				// set order item props
+				$order_item_product->set_name( $product->get_formatted_name() );
+				$order_item_product->set_product( $product );
+				$order_item_product->set_product_id( $product->get_id() );
+				$order_item_product->set_quantity( 1 );
+				$order_item_product->set_subtotal( $product->get_price() );
+				$order_item_product->set_total( $product->get_price() );
+				// save the order item
+				$order_item_product->save();
+				$order_item_product->save_meta_data();
+
+				// add the item and complete the order
+				$order->add_item( $order_item_product );
+				$order->set_status( 'completed' );
+				$order->add_order_note( __( 'Order automatically created while bulk generating memberships', 'woocommerce-dev-helper' ) );
+
+				// save the order
+				$order->save();
+				$order->save_meta_data();
+
+				// set the membership ID on the newly created order
+				wc_memberships_set_order_access_granted_membership( $order->get_id(), $user_membership );
+			}
+		}
+
+		return $order;
+	}
+
+
+	/**
 	 * Creates rules for a membership plan.
 	 *
 	 * @since 1.0.0
@@ -815,22 +928,19 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			if ( is_numeric( $product_id ) ) {
 
 				$product    = new \WC_Product_Simple( $product_id );
-				$reg_price  = isset( $product_data['regular_price'] ) ? (float) $product_data['price'] : 0;
-				$sale_price = isset( $product_data['sale_price'] ) && is_numeric( $product_data['sale_price'] ) ? (float) $product_data['sale_price'] : null;
+				$reg_price  = isset( $product_data['regular_price'] ) ? max( 0, (float) $product_data['regular_price'] ): 0;
+				$sale_price = isset( $product_data['sale_price'] ) && is_numeric( $product_data['sale_price'] ) ? max( 0, (float) $product_data['sale_price'] ) : null;
 
 				$product->set_regular_price( $reg_price );
-				$product->set_price( $reg_price );
 
 				if ( null !== $sale_price ) {
-
 					$product->set_sale_price( $sale_price );
-
-					if ( $sale_price < $reg_price ) {
-						$product->set_price( $sale_price );
-					}
 				}
 
+				$product->set_price( is_numeric( $sale_price ) && $sale_price < $reg_price ? $sale_price : $reg_price );
+
 				$product->save();
+				$product->save_meta_data();
 			}
 		}
 
