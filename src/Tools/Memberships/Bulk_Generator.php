@@ -406,7 +406,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 							if ( $user_membership->get_plan()->is_access_length_type( 'fixed' ) ) {
 								$start_time = mt_rand( $now - YEAR_IN_SECONDS, $now + MONTH_IN_SECONDS );
 							} else {
-								$start_time = mt_rand( $now - MONTH_IN_SECONDS, $user_membership->get_plan()->get_access_start_date( 'timestamp' ) );
+								$start_time = mt_rand( $now - MONTH_IN_SECONDS, max( $now, $user_membership->get_plan()->get_access_start_date( 'timestamp' ) ) );
 							}
 
 							// set dates and expiration events
@@ -419,10 +419,10 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 								$random_number = mt_rand( 1, 25 );
 
 								if ( 1 === $random_number ) {
-									$user_membership->set_cancelled_date( mt_rand( $now, $user_membership->get_start_date( 'timestamp' ) ) );
+									$user_membership->set_cancelled_date( mt_rand( $now, max( $now, $user_membership->get_start_date( 'timestamp' ) ) ) );
 									$user_membership->cancel_membership( __( 'Membership randomly cancelled during automatic bulk generation.', 'woocommerce-dev-helper' ) );
 								} elseif ( $random_number > 23 ) {
-									$user_membership->set_paused_date( mt_rand( $now, $user_membership->get_start_date( 'timestamp' ) ) );
+									$user_membership->set_paused_date( mt_rand( $now, max( $now, $user_membership->get_start_date( 'timestamp' ) ) ) );
 									$user_membership->pause_membership( __( 'Membership randomly paused during automatic bulk generation.', 'woocommerce-dev-helper' ) );
 								}
 							}
@@ -818,10 +818,10 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 		$rules = $this->create_membership_plan_content_access_rules( $plan, $rules );
 		$rules = $this->create_membership_plan_products_access_rules( $plan, $rules );
-		$rules = $this->create_membership_plan_products_purchase_rules( $plan, $rules );
 		$rules = $this->create_membership_plan_products_discount_rules( $plan, $rules );
 
 		$plan->set_rules( $rules );
+		$plan->compact_rules();
 	}
 
 
@@ -836,23 +836,29 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function create_membership_plan_products_access_rules( $plan, array $rules ) {
 
-		// TODO
-		return $rules;
-	}
+		// exclude products that grant access
+		$access_products = $plan->get_product_ids();
+		$product_names   = array_keys( $this->get_products_data() );
+		$some_products   = array_rand( array_combine( $product_names, $product_names ), mt_rand( 1, 20 ) );
 
+		foreach ( $some_products as $product_name ) {
 
-	/**
-	 * Creates product purchase rules for a membership plan.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param \WC_Memberships_Membership_Plan|\WC_Memberships_Integration_Subscriptions_User_Membership $plan plan object
-	 * @param \WC_Memberships_Membership_Plan_Rule[] array of rules (default empty array as there are no rules yet)
-	 * @return \WC_Memberships_Membership_Plan_Rule[]
-	 */
-	private function create_membership_plan_products_purchase_rules( $plan, array $rules ) {
+			$product = $this->get_product( $product_name );
 
-		// TODO
+			if ( $product && ! in_array( $product->get_id(), $access_products, false ) ) {
+
+				$rules[] = new \WC_Memberships_Membership_Plan_Rule( array(
+					'id'                 => uniqid( 'rule_', false ),
+					'membership_plan_id' => $plan->get_id(),
+					'rule_type'          => 'product_restriction',
+					'access_type'        => 0 === mt_rand( 0, 1 ) ? 'view' : 'purchase',
+					'content_type'       => 'post_type',
+					'content_type_name'  => 'product',
+					'object_ids'         => array( $product->get_id() ),
+				) );
+			}
+		}
+
 		return $rules;
 	}
 
@@ -868,7 +874,43 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function create_membership_plan_products_discount_rules( $plan, array $rules ) {
 
-		// TODO
+		// exclude products that grant access
+		$access_products = $plan->get_product_ids();
+		$product_names   = array_keys( $this->get_products_data() );
+		$some_products   = array_rand( array_combine( $product_names, $product_names ), mt_rand( 1, 20 ) );
+
+		foreach ( $some_products as $product_name ) {
+
+			$product = $this->get_product( $product_name );
+
+			if ( $product && ! in_array( $product->get_id(), $access_products, false ) ) {
+
+				$rule = new \WC_Memberships_Membership_Plan_Rule( array(
+					'id'                 => uniqid( 'rule_', false ),
+					'membership_plan_id' => $plan->get_id(),
+					'rule_type'          => 'purchasing_discount',
+					'content_type'       => 'post_type',
+					'content_type_name'  => 'product',
+					'object_ids'         => array( $product->get_id() ),
+				) );
+
+				$price    = $product->get_price();
+				$discount = is_numeric( $price ) && $price > 0 ? mt_rand( 0, (float) $price ) : 0;
+
+				if ( $discount > 0 ) {
+
+					// randomly set the discount to be fixed or percentage
+					if ( 1 === mt_rand( 0, 1 ) ) {
+						$discount .= '%';
+					}
+
+					$rule->set_discount( $discount );
+
+					$rules[] = $rule;
+				}
+			}
+		}
+
 		return $rules;
 	}
 
@@ -880,12 +922,146 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 *
 	 * @param \WC_Memberships_Membership_Plan|\WC_Memberships_Integration_Subscriptions_User_Membership $plan plan object
 	 * @param \WC_Memberships_Membership_Plan_Rule[] array of rules (default empty array as there are no rules yet)
-	 * @return \WC_Memberships_Membership_Plan_Rule[]
+	 * @return \WC_Memberships_Membership_Plan_Rule[] updated rules
 	 */
-	private function create_membership_plan_content_access_rules( $plan, array $rules ) {
+	private function create_membership_plan_content_access_rules( \WC_Memberships_Membership_Plan $plan, array $rules ) {
 
-		// TODO
+		$post_names = array_keys( $this->get_posts_data() );
+		$some_posts = array_rand( array_combine( $post_names, $post_names ), mt_rand( 1, 20 ) );
+
+		foreach ( $some_posts as $post_name ) {
+
+			if ( $post = $this->get_post( $post_name ) ) {
+
+				$rules[] = new \WC_Memberships_Membership_Plan_Rule( array(
+					'id'                 => uniqid( 'rule_', false ),
+					'membership_plan_id' => $plan->get_id(),
+					'rule_type'          => 'content_restriction',
+					'content_type'       => 'post_type',
+					'content_type_name'  => 'post',
+					'object_ids'         => array( $post->ID ),
+				) );
+			}
+		}
+
 		return $rules;
+	}
+
+
+	/**
+	 * Returns posts data for post generation.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return array associative array of post names and post data
+	 */
+	private function get_posts_data() {
+
+		$posts_data = array();
+
+		foreach ( range( 'A', 'Z' ) as $letter ) {
+
+			$posts_data[ 'sample-post-' . strtolower( $letter ) ] = array(
+				/* translators: Placeholder: %s - alphabet letter */
+				'post_title' => sprintf( esc_html__( 'Sample Post %s', 'woocommerce-dev-helper' ), strtoupper( $letter ) ),
+			);
+		}
+
+		return $posts_data;
+	}
+
+
+	/**
+	 * Generates random text content.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @return string HTML
+	 */
+	private function generate_post_content() {
+
+		$delimiter = "\n\n";
+		$content   = explode( $delimiter,
+			'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam et fermentum dui. Ut orci quam, ornare sed lorem sed, hendrerit auctor dolor. Nulla viverra, nibh quis ultrices malesuada, ligula ipsum vulputate diam, aliquam egestas nibh ante vel dui. Sed in tellus interdum eros vulputate placerat sed non enim. Pellentesque eget justo porttitor urna dictum fermentum sit amet sed mauris. Praesent molestie vestibulum erat ac rhoncus. Aenean nunc risus, accumsan nec ipsum et, convallis sollicitudin dui. Proin dictum quam a semper malesuada. Etiam porta sit amet risus quis porta. Nulla facilisi. Cras at interdum ante. Ut gravida pharetra ligula vitae malesuada. Sed eget libero et arcu tempor tincidunt in ac lectus. Maecenas vitae felis enim. In in tellus consequat, condimentum eros vitae, lacinia risus. Sed vehicula sem sed risus volutpat elementum.' . "\n\n" .
+			'Nunc accumsan tempus nunc ac aliquet. Integer non ullamcorper eros, in rutrum velit. Proin cursus orci sit amet lobortis iaculis. Praesent condimentum eget felis ut laoreet. Aliquam sodales dolor id mi iaculis, non fermentum leo viverra. Aenean aliquet condimentum placerat. Aenean aliquet diam arcu. Curabitur ac ligula sem. Mauris tincidunt mauris at ligula tincidunt interdum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Phasellus sagittis, eros ut iaculis varius, lorem nibh ullamcorper sapien, nec posuere justo massa quis ligula. Curabitur eleifend quis sapien egestas tincidunt. Nulla ornare, purus eget porttitor facilisis, lorem urna semper erat, non placerat orci est lobortis mi. Curabitur convallis, urna a tincidunt accumsan, lectus orci dictum turpis, vitae pretium leo tellus a sem. Donec vulputate erat quis turpis luctus, at aliquam massa vulputate.' . "\n\n" .
+			'Phasellus vestibulum, purus in vestibulum tempor, est ligula rutrum justo, hendrerit malesuada diam lacus quis massa. Ut fringilla fringilla mattis. Aenean nisl lectus, tempor et sapien at, venenatis tempus magna. Integer sollicitudin rhoncus augue vel pretium. Etiam nisl velit, condimentum at facilisis sagittis, vehicula a diam. Phasellus congue vehicula nisi, a vulputate augue suscipit non. Etiam condimentum placerat arcu a dapibus. Phasellus adipiscing, est vel aliquet placerat, justo lacus commodo nunc, nec pretium arcu mi nec risus. Praesent a urna semper, suscipit tellus ac, consectetur metus. Integer at fringilla magna, ut gravida lorem. Sed molestie non augue in faucibus. Phasellus at dui sem. Morbi rutrum nulla sit amet elit dapibus tincidunt.' . "\n\n" .
+			'Vestibulum varius ultrices mauris eget eleifend. Morbi sagittis nisi nec leo mollis, sed laoreet mi facilisis. Curabitur non laoreet turpis. Vivamus tincidunt orci turpis, et sodales urna egestas ut. Vestibulum eget congue ligula. Quisque leo tortor, tristique in fermentum ac, imperdiet in nibh. Integer mattis porta varius. Duis rhoncus mattis orci id pharetra. Proin mauris augue, venenatis id fringilla quis, bibendum et ligula. Sed at lacinia quam. In ac quam feugiat, lobortis nunc eu, fermentum metus.' . "\n\n" .
+			'Fusce congue consectetur arcu at dignissim. Fusce euismod mauris et leo suscipit, sed rhoncus felis tincidunt. Suspendisse eu rutrum lorem, non feugiat felis. Sed at adipiscing lectus, vel fermentum metus. Donec auctor quis sapien vitae porta. Suspendisse non tempor nisi, sed egestas orci. Suspendisse elementum ullamcorper fermentum. Etiam pellentesque venenatis ipsum, id convallis tortor molestie quis. Maecenas mollis, orci ac luctus adipiscing, sem eros ullamcorper turpis, sed pharetra mi ligula sit amet neque. Duis non imperdiet lorem. Nullam feugiat risus vel risus vulputate, vel adipiscing nibh ullamcorper.' . "\n\n" .
+			'Suspendisse vitae interdum augue. Donec mauris diam, bibendum vitae malesuada et, laoreet in justo. Duis sollicitudin tincidunt mattis. Etiam non enim id nunc dapibus rhoncus eget ut tellus. Donec eu libero at leo porttitor dignissim. Mauris lobortis et orci eu suscipit. Cras fringilla ante nec ipsum aliquam tempus. Nunc in dapibus tellus. Maecenas cursus semper turpis quis pharetra. Phasellus ultrices nisi id dui facilisis varius.' . "\n\n" .
+			'Morbi sit amet enim dui. Sed non iaculis velit. Nunc quis augue laoreet, dignissim justo ut, convallis ante. Ut ut mollis lorem. Integer aliquam, magna sed pulvinar luctus, diam enim pulvinar mauris, eu malesuada orci lacus sit amet erat. Duis accumsan nunc eget velit congue, eu aliquet velit venenatis. Aenean pulvinar ultrices lorem et malesuada. Curabitur interdum ut odio et consequat. Nunc lobortis erat vel auctor ullamcorper. Nam ut felis lectus.' . "\n\n"
+		);
+
+		return wpautop( implode( $delimiter, array_slice( $content, 0, mt_rand( 1, count( $content ) ) ) ) );
+	}
+
+
+	/**
+	 * Returns post data for a post name.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $which_post post name identifier
+	 * @return array|null
+	 */
+	private function get_post_data( $which_post ) {
+
+		$posts_data = $this->get_posts_data();
+		$post_name  = $this->remove_prefix( $which_post );
+
+		return isset( $posts_data[ $post_name ] ) ? $posts_data[ $post_name ] : null;
+	}
+
+
+	/**
+	 * Returns a post, existing or new.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $which_post post name, to check if post exists already and fetch that
+	 * @return null|\WP_Post
+	 */
+	private function get_post( $which_post ) {
+
+		$posts = get_posts( array(
+			'name'           => $this->add_prefix( $which_post ),
+			'post_type'      => 'post',
+			'posts_per_page' => 1,
+		) );
+
+		$post = ! empty( $posts[0] ) ? $posts[0] : $this->create_post( $which_post );
+
+		return $post instanceof \WP_Post ? $post : null;
+	}
+
+
+	/**
+	 * Creates a post.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $which_post chosen post to create
+	 * @return null|\WP_Post
+	 */
+	private function create_post( $which_post ) {
+
+		$post = null;
+
+		if ( $post_data = $this->get_post_data( $which_post ) ) {
+
+			$post_id = wp_insert_post( wp_parse_args( $post_data, array(
+				'post_name'    => $this->add_prefix( $which_post ),
+				'post_author'  => get_current_user_id(),
+				'post_content' => $this->generate_post_content(),
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+			) ) );
+
+			if ( $post_id > 0 ) {
+				$post = get_post( $post_id );
+			}
+		}
+
+		return $post instanceof \WP_Post ? $post : null;
 	}
 
 
@@ -981,7 +1157,7 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 		$product = $this->remove_prefix( $which_product );
 		$data    = $this->get_products_data();
 
-		return ! empty( $data[ $product ] ) ? $data[ $product ] : array();
+		return ! empty( $data[ $product ] ) ? $data[ $product ] : null;
 	}
 
 
@@ -994,20 +1170,17 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function get_products_data() {
 
-		return array(
-			'simple-product-a' => array(
-				'post_title'    => __( 'Simple Product A', 'woocommerce-dev-helper' ),
-				'regular_price' => 1,
-			),
-			'simple-product-b' => array(
-				'post_title'    => __( 'Simple Product B', 'woocommerce-dev-helper' ),
-				'regular_price' => 10,
-			),
-			'simple-product-c' => array(
-				'post_title'    => __( 'Simple Product C', 'woocommerce-dev-helper' ),
-				'regular_price' => 19.80,
-			),
-		);
+		$products_data = array();
+
+		foreach ( range( 'A', 'Z' ) as $letter ) {
+
+			$products_data[ 'sample-product-' . strtolower( $letter ) ] = array(
+				'post_title'    => sprintf( esc_html__( 'Sample Product %s', 'woocommerce-dev-helper' ), strtoupper( $letter ) ),
+				'regular_price' => (float) ( mt_rand( 0, 100 ) . '.' . mt_rand( 0, 99 ) ),
+			);
+		}
+
+		return $products_data;
 	}
 
 

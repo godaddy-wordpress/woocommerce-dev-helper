@@ -252,7 +252,7 @@ class Memberships {
 												min="0"
 												max="3"
 												step="1"
-												value="1"
+												value="2"
 											/> <span class="description"><?php esc_html_e( 'Enter the minimum number of memberships that each user should have. You can enter 0 to generate non member users randomly.', 'woocommerce-dev-helper' ); ?></span>
 										</td>
 									</tr>
@@ -268,7 +268,7 @@ class Memberships {
 												min="1"
 												max="3"
 												step="1"
-												value="3"
+												value="2"
 											/> <span class="description"><?php esc_html_e( 'Enter the maximum number of membership plans each user should have access to.', 'woocommerce-dev-helper' ); ?></span>
 										</td>
 									</tr>
