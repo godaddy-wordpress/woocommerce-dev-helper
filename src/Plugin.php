@@ -389,7 +389,7 @@ class Plugin extends Framework\SV_WC_Plugin {
 
 			foreach ( $hooks as $hook => $count ) {
 
-				error_log( sprintf( '%s (%d)' . PHP_EOL, $hook, $count ) );
+				error_log( sprintf( '%s (%d)' . PHP_EOL, $hook, $count instanceof \WP_Hook ? 1 : (int) $count ) );
 			}
 		}
 	}

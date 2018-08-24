@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: A WooCommerce Dev Helper 1.0.0\n"
 "Report-Msgid-Bugs-To: "
 "https://woocommerce.com/my-account/marketplace-ticket-form/\n"
-"POT-Creation-Date: 2018-08-24 03:09:10+00:00\n"
+"POT-Creation-Date: 2018-08-24 04:24:30+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,28 +13,28 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 
-#: src/AJAX.php:102 src/AJAX.php:162
+#: src/AJAX.php:101 src/AJAX.php:161
 msgid "There is an existing job in the queue that has not completed yet."
 msgstr ""
 
-#: src/AJAX.php:105 src/AJAX.php:165 src/AJAX.php:229
+#: src/AJAX.php:104 src/AJAX.php:164 src/AJAX.php:228
 msgid "Could not load the background job handler."
 msgstr ""
 
-#: src/AJAX.php:108
+#: src/AJAX.php:107
 msgid "Invalid or missing options."
 msgstr ""
 
-#: src/AJAX.php:159
+#: src/AJAX.php:158
 msgid "There seem to be no objects to remove."
 msgstr ""
 
-#: src/AJAX.php:207
+#: src/AJAX.php:206
 #. translators: Placeholder: %s - job ID
 msgid "The background job with ID %s could not be found."
 msgstr ""
 
-#: src/AJAX.php:232
+#: src/AJAX.php:231
 msgid "Undefined background job ID."
 msgstr ""
 
@@ -275,39 +275,39 @@ msgstr ""
 msgid "Membership automatically generated for testing purposes."
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:407
+#: src/Tools/Memberships/Bulk_Generator.php:408
 msgid "Membership randomly cancelled during automatic bulk generation."
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:409
+#: src/Tools/Memberships/Bulk_Generator.php:411
 msgid "Membership randomly paused during automatic bulk generation."
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:649
+#: src/Tools/Memberships/Bulk_Generator.php:656
 msgid "Test Membership Plan A (manual only)"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:654
+#: src/Tools/Memberships/Bulk_Generator.php:661
 msgid "Test Membership Plan B (signup)"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:659
+#: src/Tools/Memberships/Bulk_Generator.php:666
 msgid "Test Membership Plan C (purchase)"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:767
+#: src/Tools/Memberships/Bulk_Generator.php:779
 msgid "Order automatically created while bulk generating memberships"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:976
+#: src/Tools/Memberships/Bulk_Generator.php:984
 msgid "Simple Product A"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:980
+#: src/Tools/Memberships/Bulk_Generator.php:988
 msgid "Simple Product B"
 msgstr ""
 
-#: src/Tools/Memberships/Bulk_Generator.php:984
+#: src/Tools/Memberships/Bulk_Generator.php:992
 msgid "Simple Product C"
 msgstr ""
 

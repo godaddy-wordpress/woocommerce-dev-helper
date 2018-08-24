@@ -730,7 +730,10 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			$order_id  = wp_insert_post( array(
 				'post_author'   => get_current_user_id(),
 				'post_type'     => 'shop_order',
-				'post_status'   => 'completed',
+				'post_status'   => 'wc-completed',
+				'ping_status'   => 'closed',
+				'post_password' => uniqid( 'order_', false ),
+				'post_excerpt'  => '',
 				'post_date'     => $start,
 				'post_date_gmt' => $start_gmt,
 			) );
@@ -739,10 +742,13 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 				// build the order
 				$order = new \WC_Order( $order_id );
+				$price = $product->get_price();
 				$data  = array(
+					'set_id'             => $order_id,
 					'set_customer_id'    => $user_membership->get_user_id(),
 					'set_date_paid'      => $start_gmt,
 					'set_date_completed' => $start_gmt,
+					'set_total'          => $price,
 				);
 
 				// set basic order props
@@ -762,15 +768,14 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 				$order_item_product->set_product( $product );
 				$order_item_product->set_product_id( $product->get_id() );
 				$order_item_product->set_quantity( 1 );
-				$order_item_product->set_subtotal( $product->get_price() );
-				$order_item_product->set_total( $product->get_price() );
+				$order_item_product->set_subtotal( $price );
+				$order_item_product->set_total( $price );
 				// save the order item
 				$order_item_product->save();
 				$order_item_product->save_meta_data();
 
 				// add the item and complete the order
 				$order->add_item( $order_item_product );
-				$order->set_status( 'completed' );
 				$order->add_order_note( __( 'Order automatically created while bulk generating memberships', 'woocommerce-dev-helper' ) );
 
 				// save the order

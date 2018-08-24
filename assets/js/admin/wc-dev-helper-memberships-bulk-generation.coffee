@@ -133,8 +133,8 @@ jQuery( document ).ready ( $ ) ->
 				action:                   action
 				security:                 nonce
 				members_to_generate:      count
-				min_memberships_per_user: if count > 0 then $( '#min-memberships-per-user' ).val() else 1
-				max_memberships_per_user: if count > 0 then $( '#max-memberships-per-user' ).val() else 1
+				min_memberships_per_user: if count > 0 then Math.max( 0, parseInt( $( '#min-memberships-per-user' ).val(), 10 ) ) else 1
+				max_memberships_per_user: if count > 0 then Math.max( 1, parseInt( $( '#max-memberships-per-user' ).val(), 10 ) ) else 3
 		}
 
 		$.post wc_dev_helper_memberships_bulk_generation.ajax_url, request.data, ( response ) ->
