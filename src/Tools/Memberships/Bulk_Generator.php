@@ -614,8 +614,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 				// set and validate access length
 				if ( is_array( $length ) ) {
-					$plan->set_access_start_date( key( $length ) );
-					$plan->set_access_end_date( current( $length ) );
+					$plan->set_access_start_date( date( 'Y-m-d H:i:s', (int) key( $length ) ) );
+					$plan->set_access_end_date( date( 'Y-m-d H:i:s', (int) current( $length ) ) );
 				} elseif ( 'unlimited' !== $length && is_string( $length ) ) {
 					$plan->set_access_length( $length );
 				}
@@ -674,6 +674,8 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 	 */
 	private function get_membership_plans_data() {
 
+		$now = current_time( 'timestamp', true );
+
 		return array(
 			// a manually assigned plan
 			'test-membership-plan-a' => array(
@@ -695,9 +697,9 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 			),
 			// a plan with product(s) to purchase to get access to (fixed length)
 			'test-membership-plan-d' => array(
-				'post_title'    => __( 'Test Membership Plan C (purchase, specific)', 'woocommerce-dev-helper' ),
+				'post_title'    => __( 'Test Membership Plan C (purchase, fixed)', 'woocommerce-dev-helper' ),
 				'access_method' => 'purchase',
-				'access_length' => array( strtotime( 'last month' ) => strtotime( 'next year' ) ),
+				'access_length' => array( strtotime( '-1 months', $now ) => strtotime( '+11 months', $now ) ),
 			),
 		);
 	}
