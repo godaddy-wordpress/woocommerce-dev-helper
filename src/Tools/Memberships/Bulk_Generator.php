@@ -610,6 +610,15 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 
 				$plan   = new \WC_Memberships_Membership_Plan( $post_id );
 				$access = isset( $plan_data['access_method'] ) ? $plan_data['access_method'] : 'manual-only';
+				$length = isset( $plan_data['access_length'] ) ? $plan_data['access_length'] : 'unlimited';
+
+				// set and validate access length
+				if ( is_array( $length ) ) {
+					$plan->set_access_start_date( key( $length ) );
+					$plan->set_access_end_date( current( $length ) );
+				} elseif ( 'unlimited' !== $length && is_string( $length ) ) {
+					$plan->set_access_length( $length );
+				}
 
 				// set and validate access method
 				$plan->set_access_method( $access );
@@ -668,18 +677,27 @@ class Bulk_Generator extends Framework\SV_WP_Background_Job_Handler {
 		return array(
 			// a manually assigned plan
 			'test-membership-plan-a' => array(
-				'post_title'    => __( 'Test Membership Plan A (manual only)', 'woocommerce-dev-helper' ),
+				'post_title'    => __( 'Test Membership Plan A (manual only, unlimited)', 'woocommerce-dev-helper' ),
 				'access_method' => 'manual-only',
+				'access_length' => 'unlimited',
 			),
 			// a signup-access membership plan
 			'test-membership-plan-b' => array(
 				'post_title'    => __( 'Test Membership Plan B (signup)', 'woocommerce-dev-helper' ),
 				'access_method' => 'signup',
+				'access_length' => '1 months',
 			),
-			// a plan with products (simple, variable) to purchase to access to
+			// a plan with product(s) to purchase to get access to (specific length)
 			'test-membership-plan-c' => array(
-				'post_title'    => __( 'Test Membership Plan C (purchase)', 'woocommerce-dev-helper' ),
+				'post_title'    => __( 'Test Membership Plan C (purchase, specific)', 'woocommerce-dev-helper' ),
 				'access_method' => 'purchase',
+				'access_length' => '1 years'
+			),
+			// a plan with product(s) to purchase to get access to (fixed length)
+			'test-membership-plan-d' => array(
+				'post_title'    => __( 'Test Membership Plan C (purchase, specific)', 'woocommerce-dev-helper' ),
+				'access_method' => 'purchase',
+				'access_length' => array( strtotime( 'last month' ) => strtotime( 'next year' ) ),
 			),
 		);
 	}
