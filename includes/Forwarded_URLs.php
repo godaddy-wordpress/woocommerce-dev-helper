@@ -167,7 +167,6 @@ class Forwarded_URLs {
 			"//{$non_forwarded_host}"       => "//{$forwarded_host}",
 		];
 
-		//$new = str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
 		$new = is_array( $content ) ? array_walk_recursive( $content, [ $this, 'replace_url' ] ) : str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
 
 		return $new;
