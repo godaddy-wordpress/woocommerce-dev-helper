@@ -48,6 +48,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
  * Refactor - Use namespaces and rename classes
  * Tweak - Add support for ngrok
  * Fix - Ensure images load for products when using an https tunnel
+ * Misc - Require PHP 5.3+
 
 ### 0.8.1 - 2017.12.13
  * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active

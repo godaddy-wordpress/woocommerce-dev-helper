@@ -35,7 +35,7 @@ class Forwarded_URLs {
 	public $non_forwarded_host;
 
 	/** @var array values to find and replace in URLS */
-	private $find_replace = [];
+	private $find_replace =  array();
 
 
 	/**
@@ -135,7 +135,7 @@ class Forwarded_URLs {
 	public function get_forwarded_host() {
 
 		// are we using Forward HQ?
-		$host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? false;
+		$host = isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] :  false;
 
 		// if not, check if we're using ngrok
 		$host = ! $host && isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $_SERVER['HTTP_HOST'];
@@ -161,13 +161,13 @@ class Forwarded_URLs {
 		$forwarded_host     = $this->get_forwarded_host();
 
 		// http, https, and protocol-less URLs
-		$this->find_replace = [
+		$this->find_replace = array(
 			"http://{$non_forwarded_host}"  => "http://{$forwarded_host}",
 			"https://{$non_forwarded_host}" => "https://{$forwarded_host}",
 			"//{$non_forwarded_host}"       => "//{$forwarded_host}",
-		];
+		);
 
-		$new = is_array( $content ) ? array_walk_recursive( $content, [ $this, 'replace_url' ] ) : str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
+		$new = is_array( $content ) ? array_walk_recursive( $content, array( $this, 'replace_url' ) ) : str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
 
 		return $new;
 	}
