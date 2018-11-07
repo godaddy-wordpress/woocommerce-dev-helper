@@ -5,9 +5,9 @@ This is a simple and opinionated plugin for helping develop/debug WooCommerce & 
 
 ### Use Forwarded URLs
 
-Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` for all your links instead of your site URL. No configuration needed.
+Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` or `HTTP_X_ORIGINAL_HOST` for all your links instead of your site URL. No configuration needed.
 
-We like [ForwardHQ](https://fwd.wf) for this, along with a `ForwardFile` in your WordPress root.
+We like to use [NGrok](http://ngrok.com/) for this.
 
 ### Subscriptions (v1.5.x and v2.x.x)
 
@@ -46,6 +46,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ### 1.0.0 - 2018-11-06
  * Refactor - Use namespaces and rename classes
+ * Tweak - Add support for ngrok
 
 ### 0.8.1 - 2017.12.13
  * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active

@@ -12,9 +12,11 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
+
+namespace SkyVerge\WooCommerce\DevHelper;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -26,7 +28,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 0.1.0
  */
-class WC_Dev_Helper_Use_Forwarded_URLs {
+class Forwarded_URLs {
 
 
 	/** @var string non-forwarded host as defined in the siteurl option */
@@ -116,7 +118,7 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 	 */
 	private function has_forwarded_host() {
 
-		return array_key_exists( 'HTTP_X_FORWARDED_HOST', $_SERVER );
+		return array_key_exists( 'HTTP_X_FORWARDED_HOST', $_SERVER ) || array_key_exists( 'HTTP_X_ORIGINAL_HOST', $_SERVER );
 	}
 
 
@@ -128,7 +130,13 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 	 */
 	public function get_forwarded_host() {
 
-		return $_SERVER['HTTP_X_FORWARDED_HOST'];
+		// are we using Forward HQ?
+		$host = $_SERVER['HTTP_X_FORWARDED_HOST'] ?? false;
+
+		// if not, check if we're using ngrok
+		$host = ! $host && isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $_SERVER['HTTP_HOST'];
+
+		return $host;
 	}
 
 
