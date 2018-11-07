@@ -34,6 +34,9 @@ class Forwarded_URLs {
 	/** @var string non-forwarded host as defined in the siteurl option */
 	public $non_forwarded_host;
 
+	/** @var array values to find and replace in URLS */
+	private $find_replace = [];
+
 
 	/**
 	 * Setup filters
@@ -94,6 +97,7 @@ class Forwarded_URLs {
 			'stylesheet_directory_uri',
 			'the_content',
 			'the_content_pre',
+			'wp_calculate_image_srcset',
 		);
 
 		foreach ( $filters as $filter ) {
@@ -156,14 +160,37 @@ class Forwarded_URLs {
 		$non_forwarded_host = $this->non_forwarded_host;
 		$forwarded_host     = $this->get_forwarded_host();
 
-		// http, https and protocol-less URLs
-		$find_replace = array(
+		// http, https, and protocol-less URLs
+		$this->find_replace = [
 			"http://{$non_forwarded_host}"  => "http://{$forwarded_host}",
 			"https://{$non_forwarded_host}" => "https://{$forwarded_host}",
 			"//{$non_forwarded_host}"       => "//{$forwarded_host}",
-		);
+		];
 
-		return str_replace( array_keys( $find_replace ), array_values( $find_replace ), $content );
+		//$new = str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
+		$new = is_array( $content ) ? array_walk_recursive( $content, [ $this, 'replace_url' ] ) : str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
+
+		return $new;
+	}
+
+
+	/**
+	 * Replaces URL host within strings recursively.
+	 *
+	 * Required because the image srcset will use upload dir, which we don't filter
+	 *  (as we filter site URL), but does so before we filter site_URL.
+	 * BUT we can't filter upload dir directly, because then WP won't auto-detect protocol
+	 *  for us, as we'd be replacing the URL too soon.
+	 * So, we filter the srcset at the last minute.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $element the array to operate on
+	 * @param int $index the internal pointer for array_walk_recursive
+	 * @return array the updated array
+	 */
+	private function replace_url( &$element, $index ) {
+		return str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $element );
 	}
 
 
