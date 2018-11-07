@@ -44,6 +44,9 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 1.0.0 - 2018-11-06
+ * Refactor - Use namespaces and rename classes
+
 ### 0.8.1 - 2017.12.13
  * Fix - Remove WC 3.3+ "Connect to WooCommerce" notice when official plugins are active
 
