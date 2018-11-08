@@ -12,9 +12,11 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
+
+namespace SkyVerge\WooCommerce\DevHelper\Integrations;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -25,7 +27,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 0.4.0
  */
-class WC_Dev_Helper_Memberships {
+class Memberships {
 
 
 	/**
@@ -37,6 +39,7 @@ class WC_Dev_Helper_Memberships {
 
 		// add support for minutes and hours-long membership plans
 		add_filter( 'wc_memberships_plan_access_period_options', array( $this, 'add_membership_plan_access_period_options' ) );
+
 		// filter the human access length information so it can work with minutes and hours
 		add_filter( 'wc_memberships_membership_plan_human_access_length', array( $this, 'filter_membership_human_access_length' ), 10, 2 );
 	}

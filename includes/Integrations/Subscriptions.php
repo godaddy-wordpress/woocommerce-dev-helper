@@ -12,9 +12,11 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
+
+namespace SkyVerge\WooCommerce\DevHelper\Integrations;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -26,7 +28,7 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 0.1.0
  */
-class WC_Dev_Helper_Subscriptions {
+class Subscriptions {
 
 
 	/**
@@ -147,7 +149,7 @@ class WC_Dev_Helper_Subscriptions {
 
 		$subscription = wcs_get_subscription( absint( $_REQUEST['id'] ) );
 
-		if ( $subscription instanceof WC_Subscription ) {
+		if ( $subscription instanceof \WC_Subscription ) {
 			echo '<div class="updated"><p>' . sprintf( esc_html__( 'Subscription renewal processed. %sView Renewal Order%s', 'woocommerce-dev-helper' ), '<a href="' . wcs_get_edit_post_link( $subscription->get_last_order() ) . '">', ' &#8594;</a>' ) . '</p></div>';
 		}
 	}
@@ -178,7 +180,7 @@ class WC_Dev_Helper_Subscriptions {
 		WC()->payment_gateways();
 
 		// trigger the renewal payment
-		WC_Subscriptions_Payment_Gateways::gateway_scheduled_subscription_payment( absint( $_GET['user'] ), $_GET['subscription'] );
+		\WC_Subscriptions_Payment_Gateways::gateway_scheduled_subscription_payment( absint( $_GET['user'] ), $_GET['subscription'] );
 
 		// success message
 		add_filter( 'woocommerce_subscriptions_list_table_pre_process_actions', array( $this, 'maybe_render_pre_subs_2_0_renewal_success_message' ) );
@@ -214,7 +216,7 @@ class WC_Dev_Helper_Subscriptions {
 	 */
 	protected function is_subs_gte_2_0() {
 
-		return version_compare( WC_Subscriptions::$version, '1.6.0', '>' );
+		return version_compare( \WC_Subscriptions::$version, '2.0.0', '>=' );
 	}
 
 
@@ -229,7 +231,7 @@ class WC_Dev_Helper_Subscriptions {
 
 		$new_periods = array(
 			'minute' => 'minute',
-			'hour'	 => 'hour',
+			'hour'   => 'hour',
 		);
 
 		return array_merge( $new_periods, $subscription_periods);

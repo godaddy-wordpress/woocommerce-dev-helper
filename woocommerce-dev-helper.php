@@ -5,11 +5,11 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 0.8.0
+ * Version: 1.0.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2015-2017 SkyVerge [info@skyverge.com]
+ * Copyright: (c) 2015-2018 SkyVerge [info@skyverge.com]
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -17,31 +17,33 @@
  * @package   WooCommerce-Dev-Helper
  * @author    SkyVerge
  * @category  Development
- * @copyright Copyright (c) 2012-2017, SkyVerge
+ * @copyright Copyright (c) 2012-2018, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+namespace SkyVerge\WooCommerce\DevHelper;
+
 defined( 'ABSPATH' ) or exit;
 
-class WC_Dev_Helper {
+class Plugin {
 
 
-	/** @var \WC_Dev_Helper instance */
+	/** @var Plugin instance */
 	protected static $instance;
 
-	/** @var \WC_Dev_Helper_Ajax instance */
+	/** @var Ajax instance */
 	protected $ajax;
 
-	/** @var \WC_Dev_Helper_Use_Forwarded_URLs instance */
+	/** @var Forwarded_URLs instance */
 	protected $use_forwarded_urls;
 
-	/** @var \WC_Dev_Helper_Subscriptions instance */
+	/** @var Integrations\Subscriptions instance */
 	protected $subscriptions;
 
-	/** @var \WC_Dev_Helper_Memberships instance */
+	/** @var Integrations\Memberships instance */
 	protected $memberships;
 
-	/** @var \WC_Bogus_Gateway instance */
+	/** @var Bogus_Gateway instance */
 	protected $gateway;
 
 
@@ -53,7 +55,7 @@ class WC_Dev_Helper {
 	public function __construct() {
 
 		// global functions
-		require_once( $this->get_plugin_path() . '/includes/wc-dev-helper-functions.php' );
+		require_once( $this->get_plugin_path() . '/includes/Functions.php' );
 
 		// remove woo updater notice
 		add_action( 'admin_init', array( $this, 'muzzle_woo_updater' ) );
@@ -81,8 +83,8 @@ class WC_Dev_Helper {
 		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
 
 		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-use-forwarded-urls.php' );
-		$this->use_forwarded_urls = new WC_Dev_Helper_Use_Forwarded_URLs();
+		require_once( $this->get_plugin_path() . '/includes/Forwarded_URLs.php' );
+		$this->use_forwarded_urls = new Forwarded_URLs();
 	}
 
 
@@ -134,11 +136,13 @@ class WC_Dev_Helper {
 	 * Add the bogus gateway to WC available gateways.
 	 *
 	 * @since 0.6.0
+	 *
 	 * @param array $gateways all available WC gateways
 	 * @return array updated gateways
 	 */
 	public function add_bogus_gateway( $gateways ) {
-		$gateways[] = 'WC_Bogus_Gateway';
+
+		$gateways[] = '\\SkyVerge\\WooCommerce\\DevHelper\\Bogus_Gateway';
 		return $gateways;
 	}
 
@@ -155,6 +159,7 @@ class WC_Dev_Helper {
 	public function change_elavon_test_values( $defaults, $gateway ) {
 
 		if ( $gateway->is_test_environment() ) {
+
 			$defaults['expiry']         = '12/19';
 			$defaults['account-number'] = '4124939999999990';
 		}
@@ -170,28 +175,28 @@ class WC_Dev_Helper {
 	 */
 	public function includes() {
 
-		require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-ajax.php' );
+		require_once( $this->get_plugin_path() . '/includes/Ajax.php' );
 		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
-			$this->ajax    = new WC_Dev_Helper_Ajax();
+			$this->ajax    = new Ajax();
 		}
 
 		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-bogus-gateway.php' );
-			$this->gateway = new WC_Bogus_Gateway();
+			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
+			$this->gateway = new Bogus_Gateway();
 		}
 
 		if ( $this->is_plugin_active( 'woocommerce-subscriptions.php' ) ) {
 
 			// Subscriptions helper
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-subscriptions.php' );
-			$this->subscriptions = new WC_Dev_Helper_Subscriptions();
+			require_once( $this->get_plugin_path() . '/includes/Integrations/Subscriptions.php' );
+			$this->subscriptions = new Integrations\Subscriptions();
 		}
 
 		if ( $this->is_plugin_active( 'woocommerce-memberships.php' ) ) {
 
 			// Memberships helper
-			require_once( $this->get_plugin_path() . '/includes/class-wc-dev-helper-memberships.php' );
-			$this->memberships = new WC_Dev_Helper_Memberships();
+			require_once( $this->get_plugin_path() . '/includes/Integrations/Memberships.php' );
+			$this->memberships = new Integrations\Memberships();
 		}
 	}
 
@@ -240,6 +245,7 @@ class WC_Dev_Helper {
 	 * Return the plugin path
 	 *
 	 * @since 0.1.0
+	 *
 	 * @return string
 	 */
 	public function get_plugin_path() {
@@ -252,6 +258,7 @@ class WC_Dev_Helper {
 	 * Helper function to determine whether a plugin is active
 	 *
 	 * @since 0.4.0
+	 *
 	 * @param string $plugin_name plugin name, as the plugin-filename.php
 	 * @return bool
 	 */
@@ -303,10 +310,10 @@ class WC_Dev_Helper {
 
 
 	/**
-	 * Return the Use_Forwarded_URLs class instance
+	 * Return the Forwarded_URLs class instance
 	 *
 	 * @since 0.1.0
-	 * @return \WC_Dev_Helper_Use_Forwarded_URLs
+	 * @return Forwarded_URLs
 	 */
 	public function use_forwarded_urls() {
 		return $this->use_forwarded_urls;
@@ -317,7 +324,7 @@ class WC_Dev_Helper {
 	 * Return the Subscriptions class instance
 	 *
 	 * @since 0.1.0
-	 * @return \WC_Dev_Helper_Subscriptions
+	 * @return Integrations\Subscriptions
 	 */
 	public function subscriptions() {
 		return $this->subscriptions;
@@ -328,7 +335,7 @@ class WC_Dev_Helper {
 	 * Return the Memberships class instance
 	 *
 	 * @since 0.4.0
-	 * @return \WC_Dev_Helper_Memberships
+	 * @return Integrations\Memberships
 	 */
 	public function memberships() {
 		return $this->memberships;
@@ -339,7 +346,7 @@ class WC_Dev_Helper {
 	 * Return the gateway class instance
 	 *
 	 * @since 0.6.0
-	 * @return \WC_Bogus_Gateway
+	 * @return Bogus_Gateway
 	 */
 	public function gateway() {
 		return $this->gateway();
@@ -353,13 +360,16 @@ class WC_Dev_Helper {
 	 * Main WC Dev Helper Instance, ensures only one instance is/can be loaded
 	 *
 	 * @since 0.1.0
+	 *
 	 * @see wc_dev_helper()
-	 * @return \WC_Dev_Helper
+	 * @return Plugin
 	 */
 	public static function instance() {
+
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
 		}
+
 		return self::$instance;
 	}
 
@@ -391,10 +401,10 @@ class WC_Dev_Helper {
  * Returns the One True Instance of WC Dev Helper
  *
  * @since 0.1.0
- * @return \WC_Dev_Helper instance
+ * @return Plugin instance
  */
 function wc_dev_helper() {
-	return WC_Dev_Helper::instance();
+	return Plugin::instance();
 }
 
 // fire it up!

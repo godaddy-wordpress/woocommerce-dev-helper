@@ -12,9 +12,11 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
+
+namespace SkyVerge\WooCommerce\DevHelper;
 
 defined( 'ABSPATH' ) or exit;
 
@@ -26,11 +28,14 @@ defined( 'ABSPATH' ) or exit;
  *
  * @since 0.1.0
  */
-class WC_Dev_Helper_Use_Forwarded_URLs {
+class Forwarded_URLs {
 
 
 	/** @var string non-forwarded host as defined in the siteurl option */
 	public $non_forwarded_host;
+
+	/** @var array values to find and replace in URLS */
+	private $find_replace =  array();
 
 
 	/**
@@ -92,6 +97,7 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 			'stylesheet_directory_uri',
 			'the_content',
 			'the_content_pre',
+			'wp_calculate_image_srcset',
 		);
 
 		foreach ( $filters as $filter ) {
@@ -116,7 +122,7 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 	 */
 	private function has_forwarded_host() {
 
-		return array_key_exists( 'HTTP_X_FORWARDED_HOST', $_SERVER );
+		return array_key_exists( 'HTTP_X_FORWARDED_HOST', $_SERVER ) || array_key_exists( 'HTTP_X_ORIGINAL_HOST', $_SERVER );
 	}
 
 
@@ -128,7 +134,13 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 	 */
 	public function get_forwarded_host() {
 
-		return $_SERVER['HTTP_X_FORWARDED_HOST'];
+		// are we using Forward HQ?
+		$host = isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] :  false;
+
+		// if not, check if we're using ngrok
+		$host = ! $host && isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $_SERVER['HTTP_HOST'];
+
+		return $host;
 	}
 
 
@@ -148,14 +160,36 @@ class WC_Dev_Helper_Use_Forwarded_URLs {
 		$non_forwarded_host = $this->non_forwarded_host;
 		$forwarded_host     = $this->get_forwarded_host();
 
-		// http, https and protocol-less URLs
-		$find_replace = array(
+		// http, https, and protocol-less URLs
+		$this->find_replace = array(
 			"http://{$non_forwarded_host}"  => "http://{$forwarded_host}",
 			"https://{$non_forwarded_host}" => "https://{$forwarded_host}",
 			"//{$non_forwarded_host}"       => "//{$forwarded_host}",
 		);
 
-		return str_replace( array_keys( $find_replace ), array_values( $find_replace ), $content );
+		$new = is_array( $content ) ? array_walk_recursive( $content, array( $this, 'replace_url' ) ) : str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $content );
+
+		return $new;
+	}
+
+
+	/**
+	 * Replaces URL host within strings recursively.
+	 *
+	 * Required because the image srcset will use upload dir, which we don't filter
+	 *  (as we filter site URL), but does so before we filter site_URL.
+	 * BUT we can't filter upload dir directly, because then WP won't auto-detect protocol
+	 *  for us, as we'd be replacing the URL too soon.
+	 * So, we filter the srcset at the last minute.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $element the array to operate on
+	 * @param int $index the internal pointer for array_walk_recursive
+	 * @return array the updated array
+	 */
+	private function replace_url( &$element, $index ) {
+		return str_replace( array_keys( $this->find_replace ), array_values( $this->find_replace ), $element );
 	}
 
 

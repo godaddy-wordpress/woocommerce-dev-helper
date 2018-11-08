@@ -12,13 +12,15 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2017, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
+namespace SkyVerge\WooCommerce\DevHelper;
+
 defined( 'ABSPATH' ) or exit;
 
-if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
+if ( ! class_exists( '\\WC_Payment_Gateway' ) ) {
 	return;
 }
 
@@ -27,7 +29,12 @@ if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
  *
  * @since 0.6.0
  */
-class WC_Bogus_Gateway extends WC_Payment_Gateway {
+class Bogus_Gateway extends \WC_Payment_Gateway {
+
+
+	/** @var string subscriptions setting */
+	private $subscriptions;
+
 
 	/**
 	 * Constructor for the gateway.
@@ -37,7 +44,7 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 	public function __construct() {
 
 		$this->id                 = 'bogus_gateway';
-		$this->icon               = apply_filters('woocommerce_bogus_icon', '');
+		$this->icon               = apply_filters( 'woocommerce_bogus_icon', '' );
 		$this->has_fields         = false;
 		$this->method_title       = __( 'Bogus', 'woocommerce-dev-helper' );
 		$this->method_description = __( 'A testing gateway that calls "payment complete" to simulate credit card transactions.', 'woocommerce-dev-helper' );
@@ -154,8 +161,8 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 
 		// Return thank you redirect
 		return array(
-			'result' 	=> 'success',
-			'redirect'	=> $this->get_return_url( $order )
+			'result'   => 'success',
+			'redirect' => $this->get_return_url( $order ),
 		);
 	}
 
@@ -167,7 +174,7 @@ class WC_Bogus_Gateway extends WC_Payment_Gateway {
 	 * @param float $amount_to_charge subscription amount to charge, could include
 	 *              multiple renewals if they've previously failed and the admin
 	 *              has enabled it
-	 * @param WC_Order $order original order containing the subscription
+	 * @param \WC_Order $order original order containing the subscription
 	 */
 	public function process_renewal_payment( $amount_to_charge, $order ) {
 
