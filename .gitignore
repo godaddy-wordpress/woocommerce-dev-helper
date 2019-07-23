@@ -7,3 +7,7 @@
 
 # NPM debug log
 npm-debug.log
+
+# Composer
+/vendor
+composer.lock
