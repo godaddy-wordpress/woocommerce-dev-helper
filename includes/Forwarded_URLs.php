@@ -135,10 +135,10 @@ class Forwarded_URLs {
 	public function get_forwarded_host() {
 
 		// are we using Forward HQ?
-		$host = isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] :  false;
+		$host = isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
 
 		// if not, check if we're using ngrok
-		$host = ! $host && isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $_SERVER['HTTP_HOST'];
+		$host = isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $host;
 
 		return $host;
 	}
