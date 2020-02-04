@@ -160,7 +160,7 @@ class Plugin {
 
 		if ( $gateway->is_test_environment() ) {
 
-			$defaults['expiry']         = '12/19';
+			$defaults['expiry']         = '12/' . ( date("y") + 1 );
 			$defaults['account-number'] = '4124939999999990';
 		}
 
