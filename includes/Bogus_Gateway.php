@@ -150,12 +150,13 @@ class Bogus_Gateway extends \WC_Payment_Gateway {
 		parent::payment_fields();
 
 		woocommerce_form_field( "{$this->id}_payment_result", [
-			'type'  => 'select',
-			'label' => __( 'Result', 'woocommerce-dev-helper' ),
-			'options' => [
+			'type'     => 'select',
+			'label'    => __( 'Result', 'woocommerce-dev-helper' ),
+			'required' => true,
+			'options'  => [
 				self::PAYMENT_RESULT_APPROVED => __( 'Approved', 'woocommerce-dev-helper' ),
-				self::PAYMENT_RESULT_DECLINED => __( 'Declined', 'woocommerce-dev-helper' ),
 				self::PAYMENT_RESULT_HELD     => __( 'Held', 'woocommerce-dev-helper' ),
+				self::PAYMENT_RESULT_DECLINED => __( 'Declined', 'woocommerce-dev-helper' ),
 			],
 		] );
 	}
