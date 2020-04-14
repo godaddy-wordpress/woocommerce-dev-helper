@@ -9,7 +9,7 @@ Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` or `
 
 We like to use [NGrok](http://ngrok.com/) for this.
 
-### Subscriptions (v1.5.x and v2.x.x)
+### Subscriptions
 
 Adds a "renew" link to each subscription under WooCommerce > Subscriptions for easy renewal processing. This is particularly useful for testing
 payment gateways that supports subscriptions.
