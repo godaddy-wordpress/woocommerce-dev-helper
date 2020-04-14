@@ -32,6 +32,16 @@ if ( ! class_exists( '\\WC_Payment_Gateway' ) ) {
 class Bogus_Gateway extends \WC_Payment_Gateway {
 
 
+	/** @var string the "accepted" payment result code */
+	const PAYMENT_RESULT_APPROVED = 'approved';
+
+	/** @var string the "declined" payment result code */
+	const PAYMENT_RESULT_DECLINED = 'declined';
+
+	/** @var string the "held" payment result code */
+	const PAYMENT_RESULT_HELD = 'held';
+
+
 	/** @var string subscriptions setting */
 	private $subscriptions;
 
@@ -131,6 +141,28 @@ class Bogus_Gateway extends \WC_Payment_Gateway {
 
 
 	/**
+	 * Renders the gateway payment fields.
+	 *
+	 * @since x.y.z
+	 */
+	public function payment_fields() {
+
+		parent::payment_fields();
+
+		woocommerce_form_field( "{$this->id}_payment_result", [
+			'type'     => 'select',
+			'label'    => __( 'Result', 'woocommerce-dev-helper' ),
+			'required' => true,
+			'options'  => [
+				self::PAYMENT_RESULT_APPROVED => __( 'Approved', 'woocommerce-dev-helper' ),
+				self::PAYMENT_RESULT_HELD     => __( 'Held', 'woocommerce-dev-helper' ),
+				self::PAYMENT_RESULT_DECLINED => __( 'Declined', 'woocommerce-dev-helper' ),
+			],
+		] );
+	}
+
+
+	/**
 	 * Returns true if Subscriptions support is enabled.
 	 *
 	 * @since 0.7.0
@@ -152,9 +184,32 @@ class Bogus_Gateway extends \WC_Payment_Gateway {
 
 		$order = wc_get_order( $order_id );
 
-		// Update order status and add a transaction note
-		$order->payment_complete();
-		$order->add_order_note( __( 'Bogus is always approved &#128526;', 'woocommerce-dev-helper' ) );
+		$result = ! empty( $_POST[ "{$this->id}_payment_result" ] ) ? $_POST[ "{$this->id}_payment_result" ] : self::PAYMENT_RESULT_APPROVED;
+
+		// halt on decline
+		if ( self::PAYMENT_RESULT_DECLINED === $result ) {
+
+			$message = __( 'Sorry, the payment was bogus &#128563;', 'woocommerce-dev-helper' );
+
+			if ( ! $order->has_status( 'failed' ) ) {
+				$order->update_status( 'failed', $message );
+			} else {
+				$order->add_order_note( $message );
+			}
+
+			throw new \Exception( $message );
+		}
+
+		// update the order status accordingly
+		if ( self::PAYMENT_RESULT_HELD === $result ) {
+
+			$order->update_status( 'on-hold', __( 'The payment may be bogus, holding the order &#129300;', 'woocommerce-dev-helper' ) );
+
+		} else {
+
+			$order->payment_complete();
+			$order->add_order_note( __( 'Payment approved &#128526;', 'woocommerce-dev-helper' ) );
+		}
 
 		// Remove cart
 		WC()->cart->empty_cart();
