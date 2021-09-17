@@ -5,7 +5,7 @@ This is a simple and opinionated plugin for helping develop/debug WooCommerce & 
 
 ### Use Forwarded URLs
 
-Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_HOST` or `HTTP_X_ORIGINAL_HOST` for all your links instead of your site URL. No configuration needed.
+Once activated, this plugin will make WordPress use `HTTP_X_FORWARDED_FOR` for all your links instead of your site URL. No configuration needed.
 
 We like to use [NGrok](http://ngrok.com/) for this.
 
@@ -44,8 +44,10 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
-### 1.0.1 - 2020.nn.nn 
- * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result 
+### 1.0.1 - 2021.nn.nn
+ * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
+  * Fix - Fix support for ngrok.io
+  * Misc - Remove support for ForwardHQ
 
 ### 1.0.0 - 2018-11-06
  * Refactor - Use namespaces and rename classes
@@ -63,7 +65,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 ### 0.7.0 - 2017.04.12
  * Feature - Use the Bogus gateway for Subscriptions automatic renewals
  * Fix - Subscriptions integration throwing a warning in WooCommerce 3.0+
- 
+
 ### 0.6.0 - 2017.02.18
  * Feature - Adds a bogus gateway that calls `$order->payment_complete()` when used
 

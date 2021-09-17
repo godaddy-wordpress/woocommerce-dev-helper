@@ -51,7 +51,9 @@ class Forwarded_URLs {
 		}
 
 		// save for URL replacement
-		$this->non_forwarded_host = parse_url( get_option( 'siteurl' ), PHP_URL_HOST );
+		$host = parse_url( get_option( 'siteurl' ), PHP_URL_HOST );
+		$port = parse_url( get_option( 'siteurl' ), PHP_URL_PORT );
+		$this->non_forwarded_host = $host . ($port ? ':' . $port : null);
 
 		// from https://github.com/50east/wp-forwarded-host-urls/
 		$filters = array(
@@ -122,7 +124,7 @@ class Forwarded_URLs {
 	 */
 	private function has_forwarded_host() {
 
-		return array_key_exists( 'HTTP_X_FORWARDED_HOST', $_SERVER ) || array_key_exists( 'HTTP_X_ORIGINAL_HOST', $_SERVER );
+		return array_key_exists( 'HTTP_X_FORWARDED_FOR', $_SERVER );
 	}
 
 
@@ -134,13 +136,7 @@ class Forwarded_URLs {
 	 */
 	public function get_forwarded_host() {
 
-		// are we using Forward HQ?
-		$host = isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST'];
-
-		// if not, check if we're using ngrok
-		$host = isset( $_SERVER['HTTP_X_ORIGINAL_HOST'] ) ? $_SERVER['HTTP_X_ORIGINAL_HOST'] : $host;
-
-		return $host;
+		return $_SERVER['HTTP_HOST'];
 	}
 
 
