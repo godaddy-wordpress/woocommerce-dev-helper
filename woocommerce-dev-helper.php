@@ -9,7 +9,7 @@
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  *
- * Copyright: (c) 2015-2018 SkyVerge [info@skyverge.com]
+ * Copyright: (c) 2015-2021 SkyVerge [info@skyverge.com]
  *
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -17,7 +17,7 @@
  * @package   WooCommerce-Dev-Helper
  * @author    SkyVerge
  * @category  Development
- * @copyright Copyright (c) 2012-2018, SkyVerge
+ * @copyright Copyright (c) 2012-2021, SkyVerge
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 

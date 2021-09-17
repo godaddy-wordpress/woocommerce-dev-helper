@@ -12,7 +12,7 @@
  *
  * @package   WC-Dev-Helper/Classes
  * @author    SkyVerge
- * @copyright Copyright (c) 2015-2018, SkyVerge, Inc.
+ * @copyright Copyright (c) 2015-2021, SkyVerge, Inc.
  * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
  */
 
