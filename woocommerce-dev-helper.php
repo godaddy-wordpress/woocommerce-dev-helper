@@ -176,7 +176,7 @@ class Plugin {
 	public function includes() {
 
 		require_once( $this->get_plugin_path() . '/includes/Ajax.php' );
-		if ( $this->is_plugin_active( 'woocommerce.php' ) && is_ajax() ) {
+		if ( $this->is_plugin_active( 'woocommerce.php' ) && wp_doing_ajax() ) {
 			$this->ajax    = new Ajax();
 		}
 
