@@ -44,8 +44,8 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
-### 1.0.1 - 2021.nn.nn
- * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
+### 1.0.1 - 2023.08.02
+  * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
   * Fix - Fix support for ngrok.io
   * Misc - Remove support for ForwardHQ
 
