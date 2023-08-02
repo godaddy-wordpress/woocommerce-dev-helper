@@ -49,7 +49,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
   * Fix - Fix support for ngrok.io
   * Misc - Remove support for ForwardHQ
 
-### 1.0.0 - 2018-11-06
+### 1.0.0 - 2018.11.06
  * Refactor - Use namespaces and rename classes
  * Tweak - Add support for ngrok
  * Fix - Ensure images load for products when using an https tunnel
