@@ -8,6 +8,8 @@
  * Version: 1.0.1
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
+ * WC requires at least: 1.0
+ * WC tested up to: 8.0
  *
  * Copyright: (c) 2015-2021 SkyVerge [info@skyverge.com]
  *
@@ -25,8 +27,9 @@ namespace SkyVerge\WooCommerce\DevHelper;
 
 defined( 'ABSPATH' ) or exit;
 
-class Plugin {
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
 
+class Plugin {
 
 	/** @var Plugin instance */
 	protected static $instance;
@@ -46,6 +49,8 @@ class Plugin {
 	/** @var Bogus_Gateway instance */
 	protected $gateway;
 
+	/** @var Bogus_Gateway_Blocks_Support instance */
+	protected $block_gateway;
 
 	/**
 	 * Bootstrap class
@@ -79,12 +84,41 @@ class Plugin {
 		// add the testing gateway
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
 
+		// register testing gateway for WC blocks
+		add_action( 'woocommerce_blocks_loaded', array( $this, 'bogus_gateway_woocommerce_blocks_support' ) );
+
+		// declare WC Cart & Checkout block support
+		add_action( 'before_woocommerce_init', function() {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+			}
+		} );
+
 		// filter default Elavon test card
 		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
 
 		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
 		require_once( $this->get_plugin_path() . '/includes/Forwarded_URLs.php' );
 		$this->use_forwarded_urls = new Forwarded_URLs();
+	}
+
+	/**
+	 * Register the testing gateway for WC Blocks support
+	 * 
+	 * @since 1.0.1
+	 * @author Nik McLaughlin
+	 */
+	public function bogus_gateway_woocommerce_blocks_support() {
+		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
+			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway_Blocks.php' );
+			// $this->block_gateway = new Bogus_Gateway_Blocks_Support();
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function( PaymentMethodRegistry $payment_method_registry ) {
+				$payment_method_registry->register( new Bogus_Gateway_Blocks_Support());
+			}
+		);
+		}
 	}
 
 
