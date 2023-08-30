@@ -34,7 +34,7 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 
 ### Misc
 
-* Removes the WooCommmerce Updater notice
+* Removes the WooCommerce Updater notice
 * Removes the strong password requirement for customer accounts
 * Helper for logging actions/filters fired during a page load -- simply add `?wcdh_hooks=actions|filters|all`, reload the page, and your desired hooks will be printed to the error log, along with the fired count
 
