@@ -46,6 +46,7 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ### 1.1.0 - 2023.08.30
  * Feature - Add Bogus gateway support to WooCommerce Checkout Block
+ * Feature - Declares the plugin compatible with WooCommerce HPOS
 
 ### 1.0.1 - 2023.08.02
  * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
