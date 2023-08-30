@@ -34,8 +34,11 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	/** @var WC_Payment_Gateway|Bogus_Gateway */
 	protected WC_Payment_Gateway $gateway;
 
-	/** @var string */
+	/** @var string block component name */
 	protected $name = 'bogus_gateway';
+
+	/** @var string block component handle */
+	protected string $handle = 'wc-bogus-gateway-blocks-integration';
 
 
 	/**
@@ -60,6 +63,22 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	public function initialize() {
 
 		$this->settings = get_option( 'bogus_gateway_settings', [] );
+
+		wp_register_script(
+			$this->handle,
+			trailingslashit( wc_dev_helper()->get_plugin_url() ) . 'assets/js/blocks/block-checkout.js',
+			[
+				'wc-blocks-registry',
+				'wc-settings',
+				'wp-element',
+				'wp-html-entities',
+				'wp-i18n',
+			],
+			Plugin::VERSION,
+			true
+		);
+
+		wp_set_script_translations( $this->handle );
 	}
 
 
@@ -86,25 +105,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles() : array {
 
-		wp_register_script(
-			'wc-bogus-gateway-blocks-integration',
-			trailingslashit( wc_dev_helper()->get_plugin_url() ) . 'assets/js/blocks/block-checkout.js',
-			[
-				'wc-blocks-registry',
-				'wc-settings',
-				'wp-element',
-				'wp-html-entities',
-				'wp-i18n',
-			],
-			Plugin::VERSION,
-			true
-		);
-
-		wp_set_script_translations( 'wc-bogus-gateway-blocks-integration');
-
-		return [
-			'wc-bogus-gateway-blocks-integration'
-		];
+		return [ $this->handle ];
 	}
 
 
@@ -117,7 +118,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles_for_admin() : array {
 
-		return [];
+		return [ $this->handle ];
 	}
 
 
