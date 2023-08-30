@@ -168,6 +168,8 @@ class Plugin {
 	/**
 	 * Adds support for WooCommerce Blocks.
 	 *
+	 * @internal
+	 *
 	 * @since 1.1.0
 	 *
 	 * @return void
@@ -192,6 +194,8 @@ class Plugin {
 
 	/**
 	 * Handles WooCommerce features compatibility.
+	 *
+	 * @internal
 	 *
 	 * @since 1.1.0
 	 *

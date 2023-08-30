@@ -82,7 +82,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 
 
 	/**
-	 * Determines if it's active.
+	 * Determines if the block component is active.
 	 *
 	 * @since 1.1.0
 	 *
@@ -98,6 +98,8 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	/**
 	 * Registers any handles of supporting scripts for the payment method.
 	 *
+	 * These will be used in the front-end view of the block.
+	 *
 	 * @since 1.1.0
 	 *
 	 * @return string[]
@@ -109,7 +111,9 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 
 
 	/**
-	 * Registers any scripts for the payment method to be loaded in admin only.
+	 * Registers any scripts for the payment method to be loaded in admin.
+	 *
+	 * This may be used to render a preview of the block component.
 	 *
 	 * @since 1.1.0
 	 *
@@ -123,6 +127,8 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 
 	/**
 	 * Gets the payment method data.
+	 *
+	 * @since 1.1.0
 	 *
 	 * @return array<string, string>
 	 */
