@@ -44,10 +44,13 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 1.1.0 - 2023.08.30
+ * Feature - Add Bogus gateway support to WooCommerce Checkout Block
+
 ### 1.0.1 - 2023.08.02
-  * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
-  * Fix - Fix support for ngrok.io
-  * Misc - Remove support for ForwardHQ
+ * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
+ * Fix - Fix support for ngrok.io
+ * Misc - Remove support for ForwardHQ
 
 ### 1.0.0 - 2018.11.06
  * Refactor - Use namespaces and rename classes
