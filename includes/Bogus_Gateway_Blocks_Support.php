@@ -51,6 +51,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	public function __construct( WC_Payment_Gateway $gateway) {
 
 		$this->gateway  = $gateway;
+		$this->settings = get_option( 'bogus_gateway_settings', [] );
 	}
 
 	/**
@@ -61,8 +62,6 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	 * @return void
 	 */
 	public function initialize() {
-
-		$this->settings = get_option( 'bogus_gateway_settings', [] );
 
 		wp_register_script(
 			$this->handle,
