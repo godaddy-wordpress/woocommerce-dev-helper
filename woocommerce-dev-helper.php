@@ -8,7 +8,7 @@
  * Version: 1.1.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
- * WC requires at least: 1.0
+ * WC requires at least: 3.9
  * WC tested up to: 8.0
  *
  * Copyright: (c) 2015-2021 SkyVerge [info@skyverge.com]
