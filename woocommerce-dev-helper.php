@@ -5,7 +5,7 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 1.0.1
+ * Version: 1.1.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
  * WC requires at least: 1.0
@@ -27,9 +27,16 @@ namespace SkyVerge\WooCommerce\DevHelper;
 
 defined( 'ABSPATH' ) or exit;
 
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
 use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 class Plugin {
+
+
+	const VERSION = '1.1.0';
+
 
 	/** @var Plugin instance */
 	protected static $instance;
@@ -81,18 +88,14 @@ class Plugin {
 			add_action( 'wp_head',   array( $this, 'bogus_gateway_styles' ) );
 		}
 
-		// add the testing gateway
-		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
+		// add the "Bogus" testing gateway
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'add_bogus_gateway' ] );
 
 		// register testing gateway for WC blocks
-		add_action( 'woocommerce_blocks_loaded', array( $this, 'bogus_gateway_woocommerce_blocks_support' ) );
+		add_action( 'woocommerce_blocks_loaded', [ $this, 'handle_wc_blocks_support' ] );
 
-		// declare WC Cart & Checkout block support
-		add_action( 'before_woocommerce_init', function() {
-			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
-			}
-		} );
+		// declare HPOS, WC Cart & Checkout Blocks support
+		add_action( 'before_woocommerce_init', [ $this, 'handle_wc_features_compatibility' ] );
 
 		// filter default Elavon test card
 		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
@@ -100,25 +103,6 @@ class Plugin {
 		// use forwarded URLs: this needs to be done as early as possible in order to set the $_SERVER['HTTPS'] var
 		require_once( $this->get_plugin_path() . '/includes/Forwarded_URLs.php' );
 		$this->use_forwarded_urls = new Forwarded_URLs();
-	}
-
-	/**
-	 * Register the testing gateway for WC Blocks support
-	 * 
-	 * @since 1.0.1
-	 * @author Nik McLaughlin
-	 */
-	public function bogus_gateway_woocommerce_blocks_support() {
-		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
-			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway_Blocks.php' );
-			// $this->block_gateway = new Bogus_Gateway_Blocks_Support();
-		add_action(
-			'woocommerce_blocks_payment_method_type_registration',
-			function( PaymentMethodRegistry $payment_method_registry ) {
-				$payment_method_registry->register( new Bogus_Gateway_Blocks_Support());
-			}
-		);
-		}
 	}
 
 
@@ -178,6 +162,51 @@ class Plugin {
 
 		$gateways[] = '\\SkyVerge\\WooCommerce\\DevHelper\\Bogus_Gateway';
 		return $gateways;
+	}
+
+
+	/**
+	 * Adds support for WooCommerce Blocks.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function handle_wc_blocks_support() {
+
+		if ( ! class_exists( AbstractPaymentMethodType::class ) ) {
+			return;
+		}
+
+		require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway_Blocks_Support.php' );
+		$this->block_gateway = new Bogus_Gateway_Blocks_Support( $this->gateway );
+
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function( PaymentMethodRegistry $payment_method_registry ) {
+				$payment_method_registry->register( $this->block_gateway );
+			}
+		);
+	}
+
+
+	/**
+	 * Handles WooCommerce features compatibility.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function handle_wc_features_compatibility() {
+
+		if ( ! class_exists( FeaturesUtil::class ) ) {
+			return;
+		}
+
+		// HPOS
+		FeaturesUtil::declare_compatibility( 'custom_order_tables', plugin_basename( __FILE__ ), true );
+		// WooCommerce Blocks
+		FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', plugin_basename( __FILE__ ), true );
 	}
 
 
@@ -276,15 +305,28 @@ class Plugin {
 
 
 	/**
-	 * Return the plugin path
+	 * Gets the plugin path.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return string
 	 */
-	public function get_plugin_path() {
+	public function get_plugin_path() : string {
 
 		return untrailingslashit( plugin_dir_path( __FILE__ ) );
+	}
+
+
+	/**
+	 * Gets the plugin URL.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return string
+	 */
+	public function get_plugin_url() : string {
+
+		return untrailingslashit( plugin_dir_url( __FILE__ ) );
 	}
 
 
@@ -310,7 +352,7 @@ class Plugin {
 
 			if ( strpos( $plugin, '/' ) ) {
 				// normal plugin name (plugin-dir/plugin-filename.php)
-				list( , $filename ) = explode( '/', $plugin );
+				[ , $filename ] = explode( '/', $plugin );
 			} else {
 				// no directory, just plugin file
 				$filename = $plugin;

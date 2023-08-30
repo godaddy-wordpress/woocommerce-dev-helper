@@ -1,9 +1,8 @@
-const settings = window.wc.wcSettings.getSetting( 'bogus_data', {} );
+const settings = window.wc.wcSettings.getSetting( 'bogus_gateway_data', {} );
 
 const label = window.wp.htmlEntities.decodeEntities( settings.title ) || window.wp.i18n.__( 'Bogus', 'woocommerce-dev-helper' );
 
 const Content = () => {
-	console.log('SV DEBUG: loading bogus gateway block content');
 	return window.wp.htmlEntities.decodeEntities( settings.description || '' );
 };
 
