@@ -1,18 +1,37 @@
+const { __ } = wp.i18n;
+
 const settings = window.wc.wcSettings.getSetting( 'bogus_gateway_data', {} );
 
-const label = window.wp.htmlEntities.decodeEntities( settings.title ) || window.wp.i18n.__( 'Bogus', 'woocommerce-dev-helper' );
+const label = window.wp.htmlEntities.decodeEntities( settings.title ) || __( 'Bogus', 'woocommerce-dev-helper' );
 
-const Content = () => {
+const Description = () => {
 	return window.wp.htmlEntities.decodeEntities( settings.description || '' );
 };
+
+const el = wp.element.createElement;
 
 const BogusGateway = {
 	name: 'bogus_gateway',
 	label: label,
-	content: Object( window.wp.element.createElement )( Content, null ),
-	edit: Object( window.wp.element.createElement )( Content, null ),
+	content: el(
+		'div',
+		null,
+		[
+			el(
+				Description,
+			),
+			el(
+				window.wc.blocksCheckout.TextInput,
+				{
+					label: __( 'Result', 'woocommerce-dev-helper' ),
+					key: 'result',
+				}
+			),
+		]
+	),
+	edit: Object( window.wp.element.createElement )( Description, null ),
 	canMakePayment: () => true,
-	placeOrderButtonLabel: window.wp.i18n.__( 'Continue', 'woocommerce-dev-helper' ),
+	placeOrderButtonLabel: __( 'Continue', 'woocommerce-dev-helper' ),
 	ariaLabel: label,
 	supports: {
 		features: settings.supports,
