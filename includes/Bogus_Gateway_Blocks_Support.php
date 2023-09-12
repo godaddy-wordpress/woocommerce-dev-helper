@@ -72,6 +72,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 				'wp-element',
 				'wp-html-entities',
 				'wp-i18n',
+				'wp-components'
 			],
 			Plugin::VERSION,
 			true
