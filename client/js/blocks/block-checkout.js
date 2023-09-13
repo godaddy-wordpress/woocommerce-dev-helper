@@ -18,42 +18,32 @@ const Description = () => {
 };
 
 const Content = () => {
-	// const [result, setResult] = useState('approved');
+	const [result, setResult] = useState('approved');
+
+	const options = [
+		{ label: 'Approved', value: 'approved' },
+		{ label: 'Declined', value: 'declined' },
+		{ label: 'Held', value: 'held' },
+	]
 
 	return (
-		createElement(
-			'div',
-			{ id: elementId },
-			[
-				createElement(
-					Description,
-					{
-						key: 'description'
-					}
-				),
-				createElement(
-					SelectControl,
-					{
-						key: 'select',
-						label: __('Result', 'woocommerce-dev-helper'),
-						value: 'approved',
-						options: [
-							{ label: 'Approved', value: 'approved' },
-							{ label: 'Declined', value: 'declined' },
-							{ label: 'Held', value: 'held' },
-						],
-						// onChange: setResult(result ?? 'approved'),
-					}
-				),
-			]
-		)
-	);
+		<div id={elementId}>
+			<Description />
+			<SelectControl
+				label={__('Result', 'woocommerce-dev-helper')}
+				key="result"
+				value={result}
+				onChange={setResult}
+				options={options}
+			/>
+		</div>
+	)
 }
 
 const BogusGateway = {
 	name: 'bogus_gateway',
 	label: label,
-	content: Content(),
+	content: <Content />,
 	edit: Object(createElement)(Description, null),
 	canMakePayment: () => true,
 	placeOrderButtonLabel: __( 'Continue', 'woocommerce-dev-helper' ),
