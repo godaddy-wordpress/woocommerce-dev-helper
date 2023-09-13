@@ -1,35 +1,33 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
+import { createElement } from '@wordpress/element';
 import { TextInput } from '@woocommerce/blocks-checkout';
-import {
-	BillingCountryInput,
-	ShippingCountryInput,
-} from '@woocommerce/base-components/country-input';
+import { decodeEntities } from '@wordpress/html-entities';
+import { getSetting } from '@woocommerce/settings';
 
-const settings = window.wc.wcSettings.getSetting( 'bogus_gateway_data', {} );
+const settings = getSetting('bogus_gateway_data', {});
 
-const label = window.wp.htmlEntities.decodeEntities( settings.title ) || __( 'Bogus', 'woocommerce-dev-helper' );
+const label = decodeEntities(settings.title) || __('Bogus', 'woocommerce-dev-helper');
 
-const el = wp.element.createElement;
 // const useState = wp.element.useState;
 const elementId = 'wc-blocks-payment-gateways-bogus-gateway-content';
 
 const Description = () => {
-	return window.wp.htmlEntities.decodeEntities( settings.description || '' );
+	return decodeEntities(settings.description || '');
 };
 
 const Content = () => {
 	// const [ result, setResult ] = useState( 'approved' );
 
 	return (
-		el(
+		createElement(
 			'div',
 			{ id: elementId },
 			[
-				el(
+				createElement(
 					Description,
 				),
-				el(
+				createElement(
 					// window.wp.components.SelectControl,
 					// {
 					// 	label: __( 'Result', 'woocommerce-dev-helper'),
@@ -41,7 +39,7 @@ const Content = () => {
 					// 	],
 					// 	onChange: setResult( result ?? 'approved' ),
 					// }
-					window.wc.blocksCheckout.TextInput,
+					TextInput,
 					{
 						label: __( 'Result', 'woocommerce-dev-helper' ),
 						key: 'result',
@@ -55,26 +53,8 @@ const Content = () => {
 const BogusGateway = {
 	name: 'bogus_gateway',
 	label: label,
-	content: el(
-		'div',
-		null,
-		[
-			el(
-				Description,
-				{
-					key: 'description',
-				}
-			),
-			el(
-				BillingCountryInput,
-				{
-					label: __( 'Result', 'woocommerce-dev-helper' ),
-					key: 'result',
-				}
-			),
-		]
-	),
-	edit: Object( window.wp.element.createElement )( Description, null ),
+	content: Content(),
+	edit: Object(createElement)(Description, null),
 	canMakePayment: () => true,
 	placeOrderButtonLabel: __( 'Continue', 'woocommerce-dev-helper' ),
 	ariaLabel: label,
