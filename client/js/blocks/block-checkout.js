@@ -1,7 +1,8 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
-import { createElement } from '@wordpress/element';
+import { createElement, useState } from '@wordpress/element';
 import { TextInput } from '@woocommerce/blocks-checkout';
+import { SelectControl } from 'wordpress-components';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 
@@ -17,7 +18,7 @@ const Description = () => {
 };
 
 const Content = () => {
-	// const [ result, setResult ] = useState( 'approved' );
+	// const [result, setResult] = useState('approved');
 
 	return (
 		createElement(
@@ -26,24 +27,23 @@ const Content = () => {
 			[
 				createElement(
 					Description,
+					{
+						key: 'description'
+					}
 				),
 				createElement(
-					// window.wp.components.SelectControl,
-					// {
-					// 	label: __( 'Result', 'woocommerce-dev-helper'),
-					// 	value: result ?? 'approved',
-					// 	options: [
-					// 		{ label: 'Approved', value: 'approved'},
-					// 		{ label: 'Declined', value: 'declined'},
-					// 		{ label: 'Held', value: 'held'},
-					// 	],
-					// 	onChange: setResult( result ?? 'approved' ),
-					// }
-					TextInput,
+					SelectControl,
 					{
-						label: __( 'Result', 'woocommerce-dev-helper' ),
-						key: 'result',
-					},
+						key: 'select',
+						label: __('Result', 'woocommerce-dev-helper'),
+						value: 'approved',
+						options: [
+							{ label: 'Approved', value: 'approved' },
+							{ label: 'Declined', value: 'declined' },
+							{ label: 'Held', value: 'held' },
+						],
+						// onChange: setResult(result ?? 'approved'),
+					}
 				),
 			]
 		)
