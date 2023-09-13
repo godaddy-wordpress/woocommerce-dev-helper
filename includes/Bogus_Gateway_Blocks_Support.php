@@ -139,6 +139,11 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 			'title'       => $this->gateway->method_title,
 			'description' => $this->gateway->method_description,
 			'supports'    => $this->gateway->supports,
+			'result_options' => [
+				['value' => Bogus_Gateway::PAYMENT_RESULT_APPROVED, 'label' => __( 'Approved', 'woocommerce-dev-helper' ) ],
+				['value' => Bogus_Gateway::PAYMENT_RESULT_HELD,     'label' => __( 'Held', 'woocommerce-dev-helper' ) ],
+				['value' => Bogus_Gateway::PAYMENT_RESULT_DECLINED, 'label' => __( 'Declined', 'woocommerce-dev-helper' ) ],
+			]
 		];
 	}
 

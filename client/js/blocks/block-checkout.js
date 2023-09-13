@@ -20,11 +20,7 @@ const Description = () => {
 const Content = () => {
 	const [result, setResult] = useState('approved');
 
-	const options = [
-		{ label: 'Approved', value: 'approved' },
-		{ label: 'Declined', value: 'declined' },
-		{ label: 'Held', value: 'held' },
-	]
+	const options = settings.result_options
 
 	return (
 		<div id={elementId}>
