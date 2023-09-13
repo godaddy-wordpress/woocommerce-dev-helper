@@ -1,4 +1,10 @@
-const { __ } = wp.i18n;
+import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import { __ } from '@wordpress/i18n';
+import { TextInput } from '@woocommerce/blocks-checkout';
+import {
+	BillingCountryInput,
+	ShippingCountryInput,
+} from '@woocommerce/base-components/country-input';
 
 const settings = window.wc.wcSettings.getSetting( 'bogus_gateway_data', {} );
 
@@ -49,7 +55,25 @@ const Content = () => {
 const BogusGateway = {
 	name: 'bogus_gateway',
 	label: label,
-	content: Content(),
+	content: el(
+		'div',
+		null,
+		[
+			el(
+				Description,
+				{
+					key: 'description',
+				}
+			),
+			el(
+				BillingCountryInput,
+				{
+					label: __( 'Result', 'woocommerce-dev-helper' ),
+					key: 'result',
+				}
+			),
+		]
+	),
 	edit: Object( window.wp.element.createElement )( Description, null ),
 	canMakePayment: () => true,
 	placeOrderButtonLabel: __( 'Continue', 'woocommerce-dev-helper' ),
@@ -59,4 +83,4 @@ const BogusGateway = {
 	},
 };
 
-window.wc.wcBlocksRegistry.registerPaymentMethod( BogusGateway );
+registerPaymentMethod(BogusGateway);

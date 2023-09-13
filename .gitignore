@@ -11,3 +11,6 @@ npm-debug.log
 # Composer
 /vendor
 composer.lock
+
+# Compiled assets
+assets/
