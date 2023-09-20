@@ -13,4 +13,4 @@ npm-debug.log
 composer.lock
 
 # Compiled assets
-assets/
+assets/js/blocks

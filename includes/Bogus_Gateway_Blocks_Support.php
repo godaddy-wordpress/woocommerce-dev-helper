@@ -72,13 +72,17 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 				'wp-element',
 				'wp-html-entities',
 				'wp-i18n',
-				'wp-components'
 			],
 			Plugin::VERSION,
 			true
 		);
 
 		wp_set_script_translations( $this->handle );
+
+		wp_enqueue_block_style('checkout', [
+			'handle' => $this->handle,
+			'src' => wc_dev_helper()->get_plugin_url() . '/assets/css/blocks/block-checkout.css'
+		]);
 	}
 
 

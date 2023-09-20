@@ -1,22 +1,14 @@
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
 import { __ } from '@wordpress/i18n';
 import { createElement, useState, useEffect } from '@wordpress/element';
-import { TextInput } from '@woocommerce/blocks-checkout';
-// import { SelectControl } from 'wordpress-components';
 import { decodeEntities } from '@wordpress/html-entities';
 import { getSetting } from '@woocommerce/settings';
 
 const settings = getSetting('bogus_gateway_data', {});
-
 const label = decodeEntities(settings.title) || __('Bogus', 'woocommerce-dev-helper');
-
-// const useState = wp.element.useState;
 const elementId = 'wc-blocks-payment-gateways-bogus-gateway-content';
-const SelectControl = window.wp.components.SelectControl;
 
-const Description = () => {
-	return decodeEntities(settings.description || '');
-};
+const Description = () => decodeEntities(settings.description || '');
 
 const Content = ( props ) => {
 	const [result, setResult] = useState('approved');
@@ -32,7 +24,7 @@ const Content = ( props ) => {
 			let inputIsValid = false;
 			for ( const index of options ){
 				inputIsValid = ( index['value'] === result );
-				if (inputIsValid == true) break;
+				if (inputIsValid === true) break;
 			}
 
 			// return result for server-side gateway processing
@@ -63,16 +55,17 @@ const Content = ( props ) => {
 		result,
 	] );
 
+	const selectOptions = options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)
+
 	return (
 		<div id={elementId}>
 			<Description />
-			<SelectControl
-				label={__('Result', 'woocommerce-dev-helper')}
-				key="result"
-				value={result}
-				onChange={setResult}
-				options={options}
-			/>
+			<div className="wc-block-components-text-input is-active">
+				<label htmlFor="result" key="label">{__('Result', 'woocommerce-dev-helper')}</label>
+				<select name="result" onChange={(e) => setResult(e.target.value)} value={result}>
+					{selectOptions}
+				</select>
+			</div>
 		</div>
 	)
 }
