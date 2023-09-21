@@ -29,3 +29,10 @@
 	padding: 1.5em 0 0.25em;
 	min-width: 200px;
 }
+
+.wc-block-components-text-input select:focus {
+	background-color: #fff;
+	box-shadow: 0 0 0 1px #50575e;
+	color: #2b2d2f;
+	outline: 0;
+}
