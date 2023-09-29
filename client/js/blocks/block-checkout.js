@@ -15,10 +15,10 @@ const Content = ( props ) => {
 	const options = settings.result_options
 
 	const { eventRegistration, emitResponse } = props;
-	const { onPaymentProcessing } = eventRegistration;
+	const { onPaymentSetup } = eventRegistration;
 
 	useEffect( () => {
-		const unsubscribe = onPaymentProcessing( async () => {
+		const unsubscribe = onPaymentSetup( async () => {
 
 			// validate input
 			let inputIsValid = false;
@@ -51,7 +51,7 @@ const Content = ( props ) => {
 	}, [
 		emitResponse.responseTypes.ERROR,
 		emitResponse.responseTypes.SUCCESS,
-		onPaymentProcessing,
+		onPaymentSetup,
 		result,
 	] );
 
