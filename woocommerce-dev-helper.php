@@ -426,7 +426,7 @@ class Plugin {
 	 *
 	 * @return Bogus_Gateway
 	 */
-	public function gateway() {
+	public function gateway() : Bogus_Gateway {
 
 		if ( ! $this->gateway ) {
 			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
@@ -437,9 +437,6 @@ class Plugin {
 	}
 
 
-	/** Housekeeping **********************************************************/
-
-
 	/**
 	 * Main WC Dev Helper Instance, ensures only one instance is/can be loaded
 	 *
@@ -448,7 +445,7 @@ class Plugin {
 	 * @see wc_dev_helper()
 	 * @return Plugin
 	 */
-	public static function instance() {
+	public static function instance() : Plugin {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
@@ -487,7 +484,7 @@ class Plugin {
  * @since 0.1.0
  * @return Plugin instance
  */
-function wc_dev_helper() {
+function wc_dev_helper() : Plugin {
 	return Plugin::instance();
 }
 
