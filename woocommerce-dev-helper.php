@@ -181,7 +181,7 @@ class Plugin {
 		}
 
 		require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway_Blocks_Support.php' );
-		$this->block_gateway = new Bogus_Gateway_Blocks_Support( $this->gateway );
+		$this->block_gateway = new Bogus_Gateway_Blocks_Support( $this->gateway() );
 
 		add_action(
 			'woocommerce_blocks_payment_method_type_registration',
@@ -247,7 +247,7 @@ class Plugin {
 			$this->ajax    = new Ajax();
 		}
 
-		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
+		if ( ! $this->gateway && $this->is_plugin_active( 'woocommerce.php' ) ) {
 			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
 			$this->gateway = new Bogus_Gateway();
 		}
@@ -386,9 +386,6 @@ class Plugin {
 	}
 
 
-	/** Instance Getters ******************************************************/
-
-
 	/**
 	 * Return the Forwarded_URLs class instance
 	 *
@@ -423,13 +420,20 @@ class Plugin {
 
 
 	/**
-	 * Return the gateway class instance
+	 * Returns the gateway class instance.
 	 *
 	 * @since 0.6.0
+	 *
 	 * @return Bogus_Gateway
 	 */
 	public function gateway() {
-		return $this->gateway();
+
+		if ( ! $this->gateway ) {
+			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
+			$this->gateway = new Bogus_Gateway();
+		}
+
+		return $this->gateway;
 	}
 
 

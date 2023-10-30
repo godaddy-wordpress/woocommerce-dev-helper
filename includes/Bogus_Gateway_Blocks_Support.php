@@ -48,7 +48,7 @@ class Bogus_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 	 *
 	 * @param Bogus_Gateway $gateway
 	 */
-	public function __construct( WC_Payment_Gateway $gateway) {
+	public function __construct( WC_Payment_Gateway $gateway ) {
 
 		$this->gateway  = $gateway;
 		$this->settings = get_option( 'bogus_gateway_settings', [] );
