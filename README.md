@@ -34,7 +34,7 @@ Adds a testing payment gateway that will call the `$order->payment_complete()` m
 
 ### Misc
 
-* Removes the WooCommmerce Updater notice
+* Removes the WooCommerce Updater notice
 * Removes the strong password requirement for customer accounts
 * Helper for logging actions/filters fired during a page load -- simply add `?wcdh_hooks=actions|filters|all`, reload the page, and your desired hooks will be printed to the error log, along with the fired count
 
@@ -44,10 +44,14 @@ Download and install just like any other WordPress plugin. If you want to be rea
 
 ## Changelog
 
+### 1.1.0 - 2023.08.30
+ * Feature - Add Bogus gateway support to WooCommerce Checkout Block
+ * Feature - Declares the plugin compatible with WooCommerce HPOS
+
 ### 1.0.1 - 2023.08.02
-  * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
-  * Fix - Fix support for ngrok.io
-  * Misc - Remove support for ForwardHQ
+ * Tweak - Add a field at checkout when selecting the bogus payment gateway to specify the desired payment result
+ * Fix - Fix support for ngrok.io
+ * Misc - Remove support for ForwardHQ
 
 ### 1.0.0 - 2018.11.06
  * Refactor - Use namespaces and rename classes

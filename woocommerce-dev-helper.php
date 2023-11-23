@@ -5,9 +5,11 @@
  * Description: A simple plugin for helping develop/debug WooCommerce & extensions
  * Author: SkyVerge
  * Author URI: http://www.skyverge.com
- * Version: 1.0.1
+ * Version: 1.1.0
  * Text Domain: woocommerce-dev-helper
  * Domain Path: /i18n/languages/
+ * WC requires at least: 3.9
+ * WC tested up to: 8.0
  *
  * Copyright: (c) 2015-2021 SkyVerge [info@skyverge.com]
  *
@@ -25,7 +27,15 @@ namespace SkyVerge\WooCommerce\DevHelper;
 
 defined( 'ABSPATH' ) or exit;
 
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType;
+use Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 class Plugin {
+
+
+	const VERSION = '1.1.0';
 
 
 	/** @var Plugin instance */
@@ -46,6 +56,8 @@ class Plugin {
 	/** @var Bogus_Gateway instance */
 	protected $gateway;
 
+	/** @var Bogus_Gateway_Blocks_Support instance */
+	protected $block_gateway;
 
 	/**
 	 * Bootstrap class
@@ -76,8 +88,14 @@ class Plugin {
 			add_action( 'wp_head',   array( $this, 'bogus_gateway_styles' ) );
 		}
 
-		// add the testing gateway
-		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_bogus_gateway' ) );
+		// add the "Bogus" testing gateway
+		add_filter( 'woocommerce_payment_gateways', [ $this, 'add_bogus_gateway' ] );
+
+		// register testing gateway for WC blocks
+		add_action( 'woocommerce_blocks_loaded', [ $this, 'handle_wc_blocks_support' ] );
+
+		// declare HPOS, WC Cart & Checkout Blocks support
+		add_action( 'before_woocommerce_init', [ $this, 'handle_wc_features_compatibility' ] );
 
 		// filter default Elavon test card
 		add_filter( 'woocommerce_elavon_credit_card_default_values', array( $this, 'change_elavon_test_values' ), 10, 2 );
@@ -148,6 +166,55 @@ class Plugin {
 
 
 	/**
+	 * Adds support for WooCommerce Blocks.
+	 *
+	 * @internal
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function handle_wc_blocks_support() {
+
+		if ( ! class_exists( AbstractPaymentMethodType::class ) ) {
+			return;
+		}
+
+		require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway_Blocks_Support.php' );
+		$this->block_gateway = new Bogus_Gateway_Blocks_Support( $this->gateway() );
+
+		add_action(
+			'woocommerce_blocks_payment_method_type_registration',
+			function( PaymentMethodRegistry $payment_method_registry ) {
+				$payment_method_registry->register( $this->block_gateway );
+			}
+		);
+	}
+
+
+	/**
+	 * Handles WooCommerce features compatibility.
+	 *
+	 * @internal
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return void
+	 */
+	public function handle_wc_features_compatibility() {
+
+		if ( ! class_exists( FeaturesUtil::class ) ) {
+			return;
+		}
+
+		// HPOS
+		FeaturesUtil::declare_compatibility( 'custom_order_tables', plugin_basename( __FILE__ ), true );
+		// WooCommerce Blocks
+		FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', plugin_basename( __FILE__ ), true );
+	}
+
+
+	/**
 	 * Changes the Elavon default payment form values.
 	 *
 	 * @since 0.8.0
@@ -180,7 +247,7 @@ class Plugin {
 			$this->ajax    = new Ajax();
 		}
 
-		if ( $this->is_plugin_active( 'woocommerce.php' ) ) {
+		if ( ! $this->gateway && $this->is_plugin_active( 'woocommerce.php' ) ) {
 			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
 			$this->gateway = new Bogus_Gateway();
 		}
@@ -242,15 +309,28 @@ class Plugin {
 
 
 	/**
-	 * Return the plugin path
+	 * Gets the plugin path.
 	 *
 	 * @since 0.1.0
 	 *
 	 * @return string
 	 */
-	public function get_plugin_path() {
+	public function get_plugin_path() : string {
 
 		return untrailingslashit( plugin_dir_path( __FILE__ ) );
+	}
+
+
+	/**
+	 * Gets the plugin URL.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @return string
+	 */
+	public function get_plugin_url() : string {
+
+		return untrailingslashit( plugin_dir_url( __FILE__ ) );
 	}
 
 
@@ -276,7 +356,7 @@ class Plugin {
 
 			if ( strpos( $plugin, '/' ) ) {
 				// normal plugin name (plugin-dir/plugin-filename.php)
-				list( , $filename ) = explode( '/', $plugin );
+				[ , $filename ] = explode( '/', $plugin );
 			} else {
 				// no directory, just plugin file
 				$filename = $plugin;
@@ -304,9 +384,6 @@ class Plugin {
 			</style>';
 		}
 	}
-
-
-	/** Instance Getters ******************************************************/
 
 
 	/**
@@ -343,17 +420,21 @@ class Plugin {
 
 
 	/**
-	 * Return the gateway class instance
+	 * Returns the gateway class instance.
 	 *
 	 * @since 0.6.0
+	 *
 	 * @return Bogus_Gateway
 	 */
-	public function gateway() {
-		return $this->gateway();
+	public function gateway() : Bogus_Gateway {
+
+		if ( ! $this->gateway ) {
+			require_once( $this->get_plugin_path() . '/includes/Bogus_Gateway.php' );
+			$this->gateway = new Bogus_Gateway();
+		}
+
+		return $this->gateway;
 	}
-
-
-	/** Housekeeping **********************************************************/
 
 
 	/**
@@ -364,7 +445,7 @@ class Plugin {
 	 * @see wc_dev_helper()
 	 * @return Plugin
 	 */
-	public static function instance() {
+	public static function instance() : Plugin {
 
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new self();
@@ -403,7 +484,7 @@ class Plugin {
  * @since 0.1.0
  * @return Plugin instance
  */
-function wc_dev_helper() {
+function wc_dev_helper() : Plugin {
 	return Plugin::instance();
 }
 
